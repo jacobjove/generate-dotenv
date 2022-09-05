@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/iacobfred/generate-dotenv-action.git"
+    "url": "git+https://github.com/iacobfred/generate-dotenv.git"
   },
   "keywords": [
     "actions",
@@ -24,9 +24,9 @@
   "author": "Jacob Fredericksen <jacob.t.fredericksen@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/iacobfred/generate-dotenv-action/issues"
+    "url": "https://github.com/iacobfred/generate-dotenv/issues"
   },
-  "homepage": "https://github.com/iacobfred/generate-dotenv-action#readme",
+  "homepage": "https://github.com/iacobfred/generate-dotenv#readme",
   "dependencies": {
     "@actions/core": "^1.6.0"
   },

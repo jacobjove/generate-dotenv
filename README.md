@@ -28,7 +28,7 @@ jobs:
       SHA: ${{ github.sha }}
     steps:
       - uses: actions/checkout@v3
-      - uses: iacobfred/generate-dotenv-action@v1.0.0
+      - uses: iacobfred/generate-dotenv@v1.0.0
         with:
           template-path: '.config/.env.template'
           output-path: '.env'
