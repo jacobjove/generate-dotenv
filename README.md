@@ -1,4 +1,4 @@
-# Generate dotenv action
+# Generate dotenv file
 
 This action generates a dotenv file (for use in a GitHub Actions workflow).
 
