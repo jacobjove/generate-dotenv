@@ -12,6 +12,9 @@ inputs:
     description: "Filepath for the output dotenv file"
     required: false
     default: ".env"
+  secrets-access-token:
+    description: "Access token for accessing secrets via the GitHub Secrets API"
+    required: false
 runs:
   using: "node16"
   main: "dist/index.js"
