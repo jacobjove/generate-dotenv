@@ -3,7 +3,9 @@ import { Inputs } from "./inputs";
 import { readFileSync } from "fs";
 import * as dotenv from "dotenv";
 
-export async function prepareEnv({ templatePath }: Pick<Inputs, "templatePath">): Promise<void> {
+export async function prepareEnv({
+  templatePath,
+}: Pick<Inputs, "templatePath">): Promise<void> {
   core.info("Reading template file ...");
   const templateFileContents = readFileSync(templatePath, "utf8");
   core.info(templateFileContents);
@@ -20,5 +22,5 @@ export async function prepareEnv({ templatePath }: Pick<Inputs, "templatePath">)
   if (missingKeys.length) {
     core.setFailed(`Missing environment variables: ${missingKeys.join(", ")}`);
   }
-  core.warning
+  core.warning;
 }

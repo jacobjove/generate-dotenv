@@ -17,13 +17,13 @@ The path of the output dotenv file. Default: `'.env'`
 
 ### `secrets-access-token`
 
-(Optional) The token used to access secrets via the 
+(Optional) The token used to access secrets via the
 [GitHub Secrets API](https://docs.github.com/en/rest/actions/secrets#about-the-secrets-api).
 
 By default, the dotenv file is generated based only on environment variables, which
-can be specified in your workflow file 
+can be specified in your workflow file
 (see [https://docs.github.com/en/actions/learn-github-actions/environment-variables](https://docs.github.com/en/actions/learn-github-actions/environment-variables)).
-However, if an access token (with adequate permissions) is provided, 
+However, if an access token (with adequate permissions) is provided,
 then this action falls back directly on GitHub Secrets for variable keys that are not found in the environment.
 
 ## Example usage
