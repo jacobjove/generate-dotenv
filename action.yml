@@ -1,0 +1,17 @@
+name: 'Generate dotenv file'
+author: 'Jacob Fredericksen'
+description: 'Action for generating a dotenv file'
+branding:
+  icon: 'file-plus'
+  color: 'red'
+inputs:
+  template-path:
+    description: 'Filepath of the template file to be used to generate the dotenv file'
+    required: true
+  output-path:
+    description: 'Filepath for the output dotenv file'
+    required: false
+    default: '.env'
+runs:
+  using: 'node16'
+  main: 'dist/index.js'
