@@ -1,10 +1,5 @@
 {
-    "language": "en",
-    "words": [
-        "dotenv",
-        "envsubst"
-    ],
-    "flagWords": [
-        "hte"
-    ]
+  "language": "en",
+  "words": ["dotenv", "envsubst"],
+  "flagWords": ["hte"]
 }

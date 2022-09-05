@@ -1,46 +1,33 @@
 import fs from "fs";
 import path from "path";
 import readline from "readline";
+import { execSync } from "child_process";
+import { generateDotEnvFile } from "../src/generator";
+
+const DOTENV_TEMPLATE_LINES = [
+  "VAR_C=${VAR_C}",
+  "VAR_B=${VAR_B}",
+  "VAR_A=${VAR_A}",
+]
+
+const DOTENV_LINES = [
+  "VAR_C=c",
+  "VAR_B=b",
+  "VAR_A=a",
+]
+
+const TEMPLATE_PATH = path.join(__dirname, ".env.template.tmp");
+const OUTPUT_PATH = path.join(__dirname, ".env.tmp");
 
 test("test if output value from action is same file as expected", async () => {
-    const envFilePath = path.resolve(__dirname, "development.env");
-    const envFileLocation = String(process.env["ENV_FILE"]);
-    expect(envFileLocation).toBe(envFilePath);
-});
-
-test("test if env file value matched with actual value", async () => {
-    const envFilePath = path.resolve(__dirname, "development.env");
-    const expectedMap = new Map([
-        ["PROJECT_NAME", "dot-env"],
-        ["DEBUG", "true"],
-        ["USERNAME", "admin"],
-        ["API_KEY", "USER_API_KEY"],
-        ["SECRET_KEY", "secret123"],
-        ["ENV_KEY_MULTIPLE", "test"],
-    ]);
-    let actualMap: Map<string, string> = new Map();
-    const readLineInterface = readline.createInterface({
-        input: fs.createReadStream(envFilePath),
-        crlfDelay: Infinity,
-    });
-    for await (const line of readLineInterface) {
-        const splitLine = line.split("=");
-        if (splitLine.length != 2) {
-            continue;
-        }
-        actualMap.set(splitLine[0], splitLine[1]);
-    }
-    if (actualMap.size != expectedMap.size) {
-        console.log(`Expected: ${[...expectedMap.entries()]}`);
-        console.log(`Actual: ${[...expectedMap.entries()]}`);
-        throw new Error("Size of two map doesn't matched");
-    }
-    for (const [key, val] of expectedMap) {
-        const actualValue = actualMap.get(key);
-        if (actualValue != val) {
-            console.log(`Expected: ${[...expectedMap.entries()]}`);
-            console.log(`Actual: ${[...expectedMap.entries()]}`);
-            throw new Error("Value doesn't matched");
-        }
-    }
+  process.env.VAR_A = "a";
+  process.env.VAR_B = "b";
+  process.env.VAR_C = "c";
+  const templateFileContent = DOTENV_TEMPLATE_LINES.join("\n");
+  fs.writeFileSync(TEMPLATE_PATH, templateFileContent);
+  await generateDotEnvFile({ templatePath: TEMPLATE_PATH, outputPath: OUTPUT_PATH });
+  fs.readFileSync(OUTPUT_PATH, "utf8").split("\n").forEach((line, index) => {
+    expect(line).toEqual(DOTENV_LINES[index]);
+  });
+  execSync(`find ${__dirname} -name "*.tmp" -type f -delete`);
 });

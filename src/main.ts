@@ -1,10 +1,9 @@
 import { readInputs } from "./inputs";
-import { execSync } from "child_process";
+import { generateDotEnvFile } from "./generator";
 
 async function run(): Promise<void> {
-    const inputs = readInputs();
-    execSync(`envsubst < ${inputs.templatePath} > ${inputs.outputPath}`);
-    // core.setOutput("env-file", envFullPath);
+  const { templatePath, outputPath } = readInputs();
+  return generateDotEnvFile({ templatePath, outputPath });
 }
 
 run();
