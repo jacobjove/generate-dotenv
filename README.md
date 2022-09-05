@@ -34,17 +34,19 @@ jobs:
           output-path: '.env'
         env:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
-          VAR_TO_BE_RENAMED: ghjk
+          VAR_TO_BE_RENAMED: ghjkl
 ```
 ### `.config/.env.template`
 ```sh
 SHA=$SHA
 SECRET_KEY=$SECRET_KEY
 RENAMED_VAR=$VAR_TO_BE_RENAMED
+NONSECRET_IMMUTABLE_VAR=12345
 ```
 ### Output: `.env`
 ```sh
 SHA=5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
 SECRET_KEY=Kt4Gn4XRgAMy7EHZPp
-RENAMED_VAR=ghjk
+RENAMED_VAR=ghjkl
+NONSECRET_IMMUTABLE_VAR=12345
 ```
