@@ -8,7 +8,7 @@
     "build": "tsc",
     "format": "prettier --write **/*.ts",
     "format-check": "prettier --check **/*.ts",
-    "package": "ncc build --source-map --license licenses.txt",
+    "package": "ncc build src/main.ts --license licenses.txt",
     "test": "jest"
   },
   "repository": {
