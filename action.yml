@@ -1,6 +1,6 @@
 name: 'Generate dotenv file'
 author: 'Jacob Fredericksen'
-description: 'Action for generating a dotenv file'
+description: 'Action for generating a dotenv file based on a template file'
 branding:
   icon: 'file-plus'
   color: 'red'
