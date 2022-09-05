@@ -1,7 +1,9 @@
 # Generate dotenv action
 
-This action generates a dotenv file (for use in a GitHub Actions workflow)
-by running `envsubst` on a specified template file.
+This action generates a dotenv file (for use in a GitHub Actions workflow).
+
+It does so by running `envsubst` on a specified template file, which must
+be included in source control.
 
 ## Inputs
 
