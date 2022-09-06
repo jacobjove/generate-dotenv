@@ -1,12 +1,22 @@
-import { readInputs } from "./inputs";
+import * as core from "@actions/core";
+import { restoreDotEnvFromCache } from "./cache";
 import { generateDotEnvFile } from "./generator";
-import { prepareEnv } from "./env";
+import { readInputs } from "./inputs";
 import { generateTemplate } from "./template";
 
 async function run(): Promise<void> {
-  const { templatePaths, outputPath } = readInputs();
+  const { cache: useCache, cacheKey, templatePaths, outputPath } = readInputs();
+  if (useCache) {
+    const restoredCacheKey = await restoreDotEnvFromCache({
+      cacheKey,
+      outputPath,
+    });
+    if (restoredCacheKey) {
+      core.info(`Restored ${outputPath} from cache.`);
+      return;
+    }
+  }
   const template = await generateTemplate({ templatePaths });
-  await prepareEnv({ template });
   return generateDotEnvFile({ template, outputPath });
 }
 

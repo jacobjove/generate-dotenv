@@ -12,6 +12,10 @@ inputs:
     description: "Filepath for the output file"
     required: false
     default: ".env"
+  cache:
+    description: "Boolean specifying whether to cache the output file ('true' or 'false')"
+    required: false
+    default: "true"
 runs:
   using: "node16"
   main: "dist/index.js"

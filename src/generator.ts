@@ -1,12 +1,14 @@
 import * as core from "@actions/core";
 import { execSync } from "child_process";
 import * as fs from "fs";
+import { prepareEnv } from "./env";
 import { Inputs } from "./inputs";
 
 export async function generateDotEnvFile({
   template,
   outputPath,
 }: { template: string } & Pick<Inputs, "outputPath">): Promise<void> {
+  await prepareEnv({ template });
   core.info("Generating dotenv file ...");
   execSync(`echo "${template}" | envsubst > ${outputPath}`, {
     env: process.env,
