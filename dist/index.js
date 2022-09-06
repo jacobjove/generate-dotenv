@@ -1711,15 +1711,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.prepareEnv = void 0;
 const core = __importStar(__nccwpck_require__(186));
-const fs_1 = __nccwpck_require__(147);
 const dotenv = __importStar(__nccwpck_require__(437));
-function prepareEnv({ templatePath, }) {
+function prepareEnv({ template, }) {
     return __awaiter(this, void 0, void 0, function* () {
         core.info("Reading template file ...");
-        const templateFileContents = (0, fs_1.readFileSync)(templatePath, "utf8");
-        core.info(templateFileContents);
         core.info("Preparing environment ...");
-        const envObject = dotenv.parse(templateFileContents);
+        const envObject = dotenv.parse(template);
         const missingKeys = [];
         Object.entries(envObject).forEach(([key, value]) => {
             const valueIsUndefined = value === undefined ||
@@ -1732,7 +1729,6 @@ function prepareEnv({ templatePath, }) {
         if (missingKeys.length) {
             core.setFailed(`Missing environment variables: ${missingKeys.join(", ")}`);
         }
-        core.warning;
     });
 }
 exports.prepareEnv = prepareEnv;
@@ -1781,10 +1777,12 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.generateDotEnvFile = void 0;
 const core = __importStar(__nccwpck_require__(186));
 const child_process_1 = __nccwpck_require__(81);
-function generateDotEnvFile({ templatePath, outputPath, }) {
+function generateDotEnvFile({ template, outputPath, }) {
     return __awaiter(this, void 0, void 0, function* () {
         core.info("Generating dotenv file ...");
-        (0, child_process_1.execSync)(`envsubst < ${templatePath} > ${outputPath}`, { env: process.env });
+        (0, child_process_1.execSync)(`echo "${template}" | envsubst > ${outputPath}`, {
+            env: process.env,
+        });
     });
 }
 exports.generateDotEnvFile = generateDotEnvFile;
@@ -1825,9 +1823,9 @@ exports.readInputs = void 0;
 const core = __importStar(__nccwpck_require__(186));
 function readInputs() {
     core.info("Reading inputs...");
-    const templatePath = core.getInput("template-path");
+    const templatePaths = core.getInput("template-paths").split(" ");
     const outputPath = core.getInput("output-path");
-    const inputs = { templatePath, outputPath };
+    const inputs = { templatePaths, outputPath };
     return inputs;
 }
 exports.readInputs = readInputs;
@@ -1853,14 +1851,84 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const inputs_1 = __nccwpck_require__(63);
 const generator_1 = __nccwpck_require__(863);
 const env_1 = __nccwpck_require__(996);
+const template_1 = __nccwpck_require__(932);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
-        const { templatePath, outputPath } = (0, inputs_1.readInputs)();
-        yield (0, env_1.prepareEnv)({ templatePath });
-        return (0, generator_1.generateDotEnvFile)({ templatePath, outputPath });
+        const { templatePaths, outputPath } = (0, inputs_1.readInputs)();
+        const template = yield (0, template_1.generateTemplate)({ templatePaths });
+        yield (0, env_1.prepareEnv)({ template });
+        return (0, generator_1.generateDotEnvFile)({ template, outputPath });
     });
 }
 run();
+
+
+/***/ }),
+
+/***/ 932:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.generateTemplate = void 0;
+const core = __importStar(__nccwpck_require__(186));
+const child_process_1 = __nccwpck_require__(81);
+const fs_1 = __nccwpck_require__(147);
+function generateTemplate({ templatePaths, }) {
+    return __awaiter(this, void 0, void 0, function* () {
+        core.info("Generating dotenv file ...");
+        let template = "";
+        if (templatePaths.length === 1) {
+            template = (0, fs_1.readFileSync)(templatePaths[0], "utf8");
+        }
+        else if (templatePaths.length > 1) {
+            (0, child_process_1.exec)(`sort -u -t '=' -k 1,1 ${templatePaths.reverse().join(" ")}`, (error, stdout, stderr) => {
+                core.info(stderr);
+                if (error)
+                    core.setFailed(error.message);
+                template = stdout;
+            });
+        }
+        else {
+            core.setFailed("No template paths provided");
+        }
+        return template;
+    });
+}
+exports.generateTemplate = generateTemplate;
 
 
 /***/ }),

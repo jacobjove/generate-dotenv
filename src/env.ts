@@ -1,16 +1,13 @@
 import * as core from "@actions/core";
-import { Inputs } from "./inputs";
-import { readFileSync } from "fs";
 import * as dotenv from "dotenv";
+import { generateTemplate } from "./template";
 
 export async function prepareEnv({
-  templatePath,
-}: Pick<Inputs, "templatePath">): Promise<void> {
+  template,
+}: { template: Awaited<ReturnType<typeof generateTemplate>> }): Promise<void> {
   core.info("Reading template file ...");
-  const templateFileContents = readFileSync(templatePath, "utf8");
-  core.info(templateFileContents);
   core.info("Preparing environment ...");
-  const envObject = dotenv.parse(templateFileContents);
+  const envObject = dotenv.parse(template);
   const missingKeys: string[] = [];
   Object.entries(envObject).forEach(([key, value]) => {
     const valueIsUndefined =
@@ -24,5 +21,4 @@ export async function prepareEnv({
   if (missingKeys.length) {
     core.setFailed(`Missing environment variables: ${missingKeys.join(", ")}`);
   }
-  core.warning;
 }

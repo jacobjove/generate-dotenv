@@ -3,9 +3,9 @@ import { Inputs } from "./inputs";
 import { execSync } from "child_process";
 
 export async function generateDotEnvFile({
-  templatePath,
+  template,
   outputPath,
-}: Inputs): Promise<void> {
+}: { template: string } & Pick<Inputs, "outputPath">): Promise<void> {
   core.info("Generating dotenv file ...");
-  execSync(`envsubst < ${templatePath} > ${outputPath}`, { env: process.env });
+  execSync(`echo "${template}" | envsubst > ${outputPath}`, { env: process.env });
 }

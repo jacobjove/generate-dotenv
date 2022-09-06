@@ -1,14 +1,14 @@
 import * as core from "@actions/core";
 
 export interface Inputs {
-  templatePath: string;
+  templatePaths: string[];
   outputPath: string;
 }
 
 export function readInputs(): Inputs {
   core.info("Reading inputs...");
-  const templatePath = core.getInput("template-path");
+  const templatePaths = core.getInput("template-paths").split(" ");
   const outputPath = core.getInput("output-path");
-  const inputs: Inputs = { templatePath, outputPath };
+  const inputs: Inputs = { templatePaths, outputPath };
   return inputs;
 }
