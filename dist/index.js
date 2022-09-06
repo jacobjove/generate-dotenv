@@ -1787,7 +1787,8 @@ function generateDotEnvFile({ template, outputPath, }) {
             if (err)
                 core.setFailed(err.message);
             const processedContent = data
-                .replace(/(^[A-Z_]+?=)([^\n\"]+?[\ ][^\n\"]+)/g, '$1"$2"')
+                .replace(/(^[A-Z_]+?=)([^\n\"\']+?[\$][^\n\"\']+)/g, "$1'$2'")
+                .replace(/(^[A-Z_]+?=)([^\n\"\']+?[\ \(\)][^\n\"]+)/g, '$1"$2"')
                 .replace(/(^[A-Z_]+?=)([\{][\"\ ]+?[^.]+[\}])/g, "$1'$2'");
             fs.writeFile(outputPath, processedContent, "utf8", function (err) {
                 if (err)
