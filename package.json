@@ -30,7 +30,7 @@
   "homepage": "https://github.com/iacobfred/generate-dotenv#readme",
   "dependencies": {
     "@actions/cache": "^3.0.4",
-    "@actions/core": "^1.6.0",
+    "@actions/core": "^1.9.1",
     "dotenv": "^16.0.2"
   },
   "devDependencies": {
