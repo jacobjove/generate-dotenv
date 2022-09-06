@@ -4,7 +4,9 @@ import { generateTemplate } from "./template";
 
 export async function prepareEnv({
   template,
-}: { template: Awaited<ReturnType<typeof generateTemplate>> }): Promise<void> {
+}: {
+  template: Awaited<ReturnType<typeof generateTemplate>>;
+}): Promise<void> {
   core.info("Reading template file ...");
   core.info("Preparing environment ...");
   const envObject = dotenv.parse(template);

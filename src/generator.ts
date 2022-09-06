@@ -7,5 +7,7 @@ export async function generateDotEnvFile({
   outputPath,
 }: { template: string } & Pick<Inputs, "outputPath">): Promise<void> {
   core.info("Generating dotenv file ...");
-  execSync(`echo "${template}" | envsubst > ${outputPath}`, { env: process.env });
+  execSync(`echo "${template}" | envsubst > ${outputPath}`, {
+    env: process.env,
+  });
 }
