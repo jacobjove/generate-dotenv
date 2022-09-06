@@ -60577,6 +60577,23 @@ const core = __importStar(__nccwpck_require__(2186));
 const child_process_1 = __nccwpck_require__(2081);
 const fs = __importStar(__nccwpck_require__(7147));
 const env_1 = __nccwpck_require__(1996);
+const POSTPROCESSING_REPLACEMENT_PATTERNS = [
+    [
+        /(^[A-Z_]+?=)([^\n\"\']+?[\$][^\n\"\']+)/g,
+        "$1'$2'",
+        "Wrap values containing dollar signs in single quotes",
+    ],
+    [
+        /(^[A-Z_]+?=)([^\n\"\']+?[\ \(\)][^\n\"]+)/g,
+        '$1"$2"',
+        "Wrap values containing spaces and/or parentheses in double quotes",
+    ],
+    [
+        /(^[A-Z_]+?=)([\{][\"\ ]+?[^.]+[\}])/g,
+        "$1'$2'",
+        "Wrap JSON-like values in single quotes",
+    ],
+];
 function generateDotEnvFile({ template, outputPath, }) {
     return __awaiter(this, void 0, void 0, function* () {
         yield (0, env_1.prepareEnv)({ template });
@@ -60587,11 +60604,17 @@ function generateDotEnvFile({ template, outputPath, }) {
         fs.readFile(outputPath, "utf8", (err, data) => {
             if (err)
                 core.setFailed(err.message);
-            const processedContent = data
-                .replace(/(^[A-Z_]+?=)([^\n\"\']+?[\$][^\n\"\']+)/g, "$1'$2'")
-                .replace(/(^[A-Z_]+?=)([^\n\"\']+?[\ \(\)][^\n\"]+)/g, '$1"$2"')
-                .replace(/(^[A-Z_]+?=)([\{][\"\ ]+?[^.]+[\}])/g, "$1'$2'");
-            fs.writeFile(outputPath, processedContent, "utf8", function (err) {
+            let processedFileContents = data;
+            POSTPROCESSING_REPLACEMENT_PATTERNS.forEach(([pattern, replacement, description]) => {
+                core.info(`Running post-processing replacement: "${description}"`);
+                for (const match of processedFileContents.matchAll(pattern)) {
+                    core.warning(`${match[0].replace(match[2], "*****")}\n` +
+                        `-->\n` +
+                        `${match[0].replace(match[2], replacement[0] + "*****" + replacement[replacement.length - 1])}`);
+                }
+                processedFileContents = processedFileContents.replace(pattern, replacement);
+            });
+            fs.writeFile(outputPath, processedFileContents, "utf8", function (err) {
                 if (err)
                     core.setFailed(err.message);
             });

@@ -4,6 +4,31 @@ import * as fs from "fs";
 import { prepareEnv } from "./env";
 import { Inputs } from "./inputs";
 
+const POSTPROCESSING_REPLACEMENT_PATTERNS: [RegExp, string, string][] = [
+  // Wrap values containing dollar signs in single quotes to prevent
+  // unintended substitutions when the dotenv file is read by a shell.
+  [
+    /(^[A-Z_]+?=)([^\n\"\']+?[\$][^\n\"\']+)/g,
+    "$1'$2'",
+    "Wrap values containing dollar signs in single quotes",
+  ],
+  // Wrap values containing spaces and/or parentheses in double quotes
+  // if they are not already wrapped in double/single quotes.
+  [
+    /(^[A-Z_]+?=)([^\n\"\']+?[\ \(\)][^\n\"]+)/g,
+    '$1"$2"',
+    "Wrap values containing spaces and/or parentheses in double quotes",
+  ],
+  // Wrap JSON-like values (beginning with an opening curly bracket and
+  // ending with a closing curly bracket) in single quotes because we
+  // assume them to contain both spaces and double quotes.
+  [
+    /(^[A-Z_]+?=)([\{][\"\ ]+?[^.]+[\}])/g,
+    "$1'$2'",
+    "Wrap JSON-like values in single quotes",
+  ],
+];
+
 export async function generateDotEnvFile({
   template,
   outputPath,
@@ -17,18 +42,27 @@ export async function generateDotEnvFile({
   // so that the file can be sourced without errors.
   fs.readFile(outputPath, "utf8", (err, data) => {
     if (err) core.setFailed(err.message);
-    const processedContent = data
-      // Wrap values containing dollar signs in single quotes to prevent
-      // unintended substitutions when the dotenv file is read by a shell.
-      .replace(/(^[A-Z_]+?=)([^\n\"\']+?[\$][^\n\"\']+)/g, "$1'$2'")
-      // Wrap values containing spaces and/or parentheses in double quotes
-      // if they are not already wrapped in double/single quotes.
-      .replace(/(^[A-Z_]+?=)([^\n\"\']+?[\ \(\)][^\n\"]+)/g, '$1"$2"')
-      // Wrap JSON-like values (beginning with an opening curly bracket and
-      // ending with a closing curly bracket) in single quotes because we
-      // assume them to contain both spaces and double quotes.
-      .replace(/(^[A-Z_]+?=)([\{][\"\ ]+?[^.]+[\}])/g, "$1'$2'");
-    fs.writeFile(outputPath, processedContent, "utf8", function (err) {
+    let processedFileContents = data;
+    POSTPROCESSING_REPLACEMENT_PATTERNS.forEach(
+      ([pattern, replacement, description]) => {
+        core.info(`Running post-processing replacement: "${description}"`);
+        for (const match of processedFileContents.matchAll(pattern)) {
+          core.warning(
+            `${match[0].replace(match[2], "*****")}\n` +
+              `-->\n` +
+              `${match[0].replace(
+                match[2],
+                replacement[0] + "*****" + replacement[replacement.length - 1]
+              )}`
+          );
+        }
+        processedFileContents = processedFileContents.replace(
+          pattern,
+          replacement
+        );
+      }
+    );
+    fs.writeFile(outputPath, processedFileContents, "utf8", function (err) {
       if (err) core.setFailed(err.message);
     });
   });
