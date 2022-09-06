@@ -11,16 +11,28 @@ be included in source control.
 
 A space-delimited list of filepaths of the template files that will be used to generate the dotenv file.
 
-This could be a single filepath (e.g., `'_.env'` or `'.env.template'`) or multiple filepaths (e.g., `'_.env _.env.prod'`).
+This could be a single filepath (e.g., `'_.env'` or `'.env.template'`) or multiple filepaths
+(e.g., `'_.env _.env.prod'`).
 
-If multiple paths are specified, the templates will be merged (with duplicate variable keys removed,
-giving priority to the contents of the right-most paths) to produce the final dotenv file.
-This can be useful for dynamically overriding a base dotenv template depending on the environment for which
-the dotenv file is being produced.
+If multiple paths are specified, the templates will be merged (with duplicate variable keys
+removed, giving priority to the contents of the right-most paths) to produce the final dotenv
+file. This can be useful for dynamically overriding a base dotenv template depending on the
+environment for which the dotenv file is being produced.
 
 ### `output-path`
 
 The path of the output dotenv file. Default: `'.env'`
+
+### `cache`
+
+(Optional) Boolean specifying whether to cache the dotenv file. Default: `'true'`
+
+### `cache-key`
+
+(Optional) The key used to cache the dotenv file (if caching is not disabled).
+
+If `cache-key` is not specified, a cache key is computed by concatenating the template paths
+and the `GITHUB_SHA` environment variable.
 
 ## Example usage
 

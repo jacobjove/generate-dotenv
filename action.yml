@@ -16,6 +16,9 @@ inputs:
     description: "Boolean specifying whether to cache the output file ('true' or 'false')"
     required: false
     default: "true"
+  cache-key:
+    description: "Key used to cache the dotenv file (default: concatenation of the template paths and the GITHUB_SHA env var)"
+    required: false
 runs:
   using: "node16"
   main: "dist/index.js"
