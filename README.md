@@ -7,24 +7,20 @@ be included in source control.
 
 ## Inputs
 
-### `template-path`
+### `template-paths`
 
-The path of the template file that will be used to generate the dotenv file.
+A space-delimited list of filepaths of the template files that will be used to generate the dotenv file.
+
+This could be a single filepath (e.g., `'_.env'` or `'.env.template'`) or multiple filepaths (e.g., `'_.env _.env.prod'`).
+
+If multiple paths are specified, the templates will be merged (with duplicate variable keys removed,
+giving priority to the contents of the right-most paths) to produce the final dotenv file.
+This can be useful for dynamically overriding a base dotenv template depending on the environment for which
+the dotenv file is being produced.
 
 ### `output-path`
 
 The path of the output dotenv file. Default: `'.env'`
-
-### `secrets-access-token`
-
-(Optional) The token used to access secrets via the
-[GitHub Secrets API](https://docs.github.com/en/rest/actions/secrets#about-the-secrets-api).
-
-By default, the dotenv file is generated based only on environment variables, which
-can be specified in your workflow file
-(see [https://docs.github.com/en/actions/learn-github-actions/environment-variables](https://docs.github.com/en/actions/learn-github-actions/environment-variables)).
-However, if an access token (with adequate permissions) is provided,
-then this action falls back directly on GitHub Secrets for variable keys that are not found in the environment.
 
 ## Example usage
 
@@ -44,14 +40,14 @@ jobs:
       - uses: actions/checkout@v3
       - uses: iacobfred/generate-dotenv@v1.0.0
         with:
-          template-path: ".config/.env.template"
+          template-paths: ".config/_.env"
           output-path: ".env"
         env:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
           VAR_TO_BE_RENAMED: ghjkl
 ```
 
-### `.config/.env.template`
+### `.config/_.env`
 
 ```sh
 SHA=$SHA
