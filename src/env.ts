@@ -14,7 +14,9 @@ export async function prepareEnv({
   const requiredVarKeys = Object.keys(envObject);
   const missingKeys: string[] = [];
   Object.entries(envObject).forEach(([key, value]) => {
-    const valueIsUndefined = value === undefined || (typeof value === "string" && value.startsWith("$"));
+    const valueIsUndefined =
+      value === undefined ||
+      (typeof value === "string" && value.startsWith("$"));
     if (valueIsUndefined && !process.env[key]) {
       core.warning(`Environment variable ${key} is not set`);
       missingKeys.push(key);
