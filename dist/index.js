@@ -1777,11 +1777,22 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.generateDotEnvFile = void 0;
 const core = __importStar(__nccwpck_require__(186));
 const child_process_1 = __nccwpck_require__(81);
+const fs = __importStar(__nccwpck_require__(147));
 function generateDotEnvFile({ template, outputPath, }) {
     return __awaiter(this, void 0, void 0, function* () {
         core.info("Generating dotenv file ...");
         (0, child_process_1.execSync)(`echo "${template}" | envsubst > ${outputPath}`, {
             env: process.env,
+        });
+        fs.readFile(outputPath, "utf8", (err, data) => {
+            if (err)
+                core.setFailed(err.message);
+            let processedContent = data.replace(/(^[A-Z_]+?=)([^\n\"]+?[\ ][^\n\"]+)/g, '$1"$2"');
+            processedContent = processedContent.replace(/(^[A-Z_]+?=)([\{][\"\ ]+?[^.]+[\}])/g, "$1'$2'");
+            fs.writeFile(outputPath, processedContent, "utf8", function (err) {
+                if (err)
+                    core.setFailed(err.message);
+            });
         });
     });
 }
