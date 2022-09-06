@@ -1720,7 +1720,6 @@ function prepareEnv({ templatePath, }) {
         core.info(templateFileContents);
         core.info("Preparing environment ...");
         const envObject = dotenv.parse(templateFileContents);
-        const requiredVarKeys = Object.keys(envObject);
         const missingKeys = [];
         Object.entries(envObject).forEach(([key, value]) => {
             const valueIsUndefined = value === undefined ||
