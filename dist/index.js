@@ -1714,7 +1714,6 @@ const core = __importStar(__nccwpck_require__(186));
 const dotenv = __importStar(__nccwpck_require__(437));
 function prepareEnv({ template, }) {
     return __awaiter(this, void 0, void 0, function* () {
-        core.info("Reading template file ...");
         core.info("Preparing environment ...");
         const envObject = dotenv.parse(template);
         const missingKeys = [];
