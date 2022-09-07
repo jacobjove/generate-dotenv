@@ -15,7 +15,7 @@ export async function generateTemplate({
         `sort -u -t '=' -k 1,1 ${templatePaths.reverse().join(" ")}`,
         {
           shell: "/bin/bash",
-          stdio: "inherit",
+          // stdio: "inherit",
           encoding: "utf8",
         }
       );
@@ -25,5 +25,6 @@ export async function generateTemplate({
   } else {
     core.setFailed("No template paths provided");
   }
+  core.info(`Final template contents:\n${template}`);
   return template;
 }

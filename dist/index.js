@@ -61214,7 +61214,7 @@ function generateTemplate({ templatePaths, }) {
             try {
                 template = (0, child_process_1.execSync)(`sort -u -t '=' -k 1,1 ${templatePaths.reverse().join(" ")}`, {
                     shell: "/bin/bash",
-                    stdio: "inherit",
+                    // stdio: "inherit",
                     encoding: "utf8",
                 });
             }
@@ -61225,6 +61225,7 @@ function generateTemplate({ templatePaths, }) {
         else {
             core.setFailed("No template paths provided");
         }
+        core.info(`Final template contents:\n${template}`);
         return template;
     });
 }
