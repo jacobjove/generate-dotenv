@@ -1,4 +1,5 @@
 import { restoreCache } from "@actions/cache";
+import * as core from "@actions/core";
 import { Inputs } from "./inputs";
 
 export async function restoreDotEnvFromCache({
@@ -13,6 +14,10 @@ export async function restoreDotEnvFromCache({
   // which is excessive for our use case, so here we set the timeout to 15 minutes by default.
   process.env.SEGMENT_DOWNLOAD_TIMEOUT_MINS =
     process.env.SEGMENT_DOWNLOAD_TIMEOUT_MINS ?? "15";
+
+  core.info(
+    `Attempting to restore dotenv file from cache using the following key: ${cacheKey}`
+  );
 
   return restoreCache(pathsToRestore, cacheKey);
 }

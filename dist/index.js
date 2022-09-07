@@ -60468,6 +60468,29 @@ module.exports = v4;
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -60480,6 +60503,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.restoreDotEnvFromCache = void 0;
 const cache_1 = __nccwpck_require__(7799);
+const core = __importStar(__nccwpck_require__(2186));
 function restoreDotEnvFromCache({ cacheKey, outputPath, }) {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
@@ -60490,6 +60514,7 @@ function restoreDotEnvFromCache({ cacheKey, outputPath, }) {
         // which is excessive for our use case, so here we set the timeout to 15 minutes by default.
         process.env.SEGMENT_DOWNLOAD_TIMEOUT_MINS =
             (_a = process.env.SEGMENT_DOWNLOAD_TIMEOUT_MINS) !== null && _a !== void 0 ? _a : "15";
+        core.info(`Attempting to restore dotenv file from cache using the following key: ${cacheKey}`);
         return (0, cache_1.restoreCache)(pathsToRestore, cacheKey);
     });
 }
