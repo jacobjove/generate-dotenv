@@ -1,5 +1,5 @@
 import * as core from "@actions/core";
-import { restoreDotEnvFromCache } from "./cache";
+import { restoreDotEnvFromCache, saveDotEnvToCache } from "./cache";
 import { generateDotEnvFile } from "./generator";
 import { readInputs } from "./inputs";
 import { generateTemplate } from "./template";
@@ -19,7 +19,10 @@ async function run(): Promise<void> {
     }
   }
   const template = await generateTemplate({ templatePaths });
-  return generateDotEnvFile({ template, outputPath });
+  await generateDotEnvFile({ template, outputPath });
+  if (useCache) {
+    saveDotEnvToCache({ cacheKey, outputPath });
+  }
 }
 
 run();

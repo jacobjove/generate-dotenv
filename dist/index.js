@@ -60851,7 +60851,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.restoreDotEnvFromCache = void 0;
+exports.saveDotEnvToCache = exports.restoreDotEnvFromCache = void 0;
 const cache_1 = __nccwpck_require__(7799);
 const core = __importStar(__nccwpck_require__(2186));
 function restoreDotEnvFromCache({ cacheKey, outputPath, }) {
@@ -60869,6 +60869,13 @@ function restoreDotEnvFromCache({ cacheKey, outputPath, }) {
     });
 }
 exports.restoreDotEnvFromCache = restoreDotEnvFromCache;
+function saveDotEnvToCache({ cacheKey, outputPath, }) {
+    return __awaiter(this, void 0, void 0, function* () {
+        core.info(`Attempting to save dotenv file to cache using the following key: ${cacheKey}`);
+        return (0, cache_1.saveCache)([outputPath], cacheKey);
+    });
+}
+exports.saveDotEnvToCache = saveDotEnvToCache;
 
 
 /***/ }),
@@ -61157,7 +61164,10 @@ function run() {
             }
         }
         const template = yield (0, template_1.generateTemplate)({ templatePaths });
-        return (0, generator_1.generateDotEnvFile)({ template, outputPath });
+        yield (0, generator_1.generateDotEnvFile)({ template, outputPath });
+        if (useCache) {
+            (0, cache_1.saveDotEnvToCache)({ cacheKey, outputPath });
+        }
     });
 }
 run();

@@ -1,4 +1,4 @@
-import { restoreCache } from "@actions/cache";
+import { restoreCache, saveCache } from "@actions/cache";
 import * as core from "@actions/core";
 import { Inputs } from "./inputs";
 
@@ -20,4 +20,14 @@ export async function restoreDotEnvFromCache({
   );
 
   return restoreCache(pathsToRestore, cacheKey);
+}
+
+export async function saveDotEnvToCache({
+  cacheKey,
+  outputPath,
+}: Pick<Inputs, "cacheKey" | "outputPath">): ReturnType<typeof saveCache> {
+  core.info(
+    `Attempting to save dotenv file to cache using the following key: ${cacheKey}`
+  );
+  return saveCache([outputPath], cacheKey);
 }
