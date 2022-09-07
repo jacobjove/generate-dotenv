@@ -11,10 +11,14 @@ export async function generateTemplate({
     template = readFileSync(templatePaths[0], "utf8");
   } else if (templatePaths.length > 1) {
     try {
-      execSync(`sort -u -t '=' -k 1,1 ${templatePaths.reverse().join(" ")}`, {
-        shell: "/bin/bash",
-        stdio: "inherit",
-      });
+      template = execSync(
+        `sort -u -t '=' -k 1,1 ${templatePaths.reverse().join(" ")}`,
+        {
+          shell: "/bin/bash",
+          stdio: "inherit",
+          encoding: "utf8",
+        }
+      );
     } catch (err) {
       core.setFailed(err instanceof Error ? err.message : `${err}`);
     }

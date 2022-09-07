@@ -61212,9 +61212,10 @@ function generateTemplate({ templatePaths, }) {
         }
         else if (templatePaths.length > 1) {
             try {
-                (0, child_process_1.execSync)(`sort -u -t '=' -k 1,1 ${templatePaths.reverse().join(" ")}`, {
+                template = (0, child_process_1.execSync)(`sort -u -t '=' -k 1,1 ${templatePaths.reverse().join(" ")}`, {
                     shell: "/bin/bash",
                     stdio: "inherit",
+                    encoding: "utf8",
                 });
             }
             catch (err) {
