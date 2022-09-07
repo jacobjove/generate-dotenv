@@ -61148,7 +61148,10 @@ function run() {
                 cacheKey,
                 outputPath,
             });
-            if (restoredCacheKey) {
+            if (typeof restoredCacheKey === "undefined") {
+                core.info("No cached dotenv file found.");
+            }
+            else if (restoredCacheKey) {
                 core.info(`Restored ${outputPath} from cache.`);
                 return;
             }
