@@ -23,7 +23,7 @@ const POSTPROCESSING_REPLACEMENT_PATTERNS: [RegExp, string, string][] = [
   // ending with a closing curly bracket) in single quotes because we
   // assume them to contain both spaces and double quotes.
   [
-    /(^[A-Z_]+?=)({ *"[^\n]+})$/gm,
+    /(^[A-Z_]+?=)({ *"[\s\S]+?})$/gm,
     "$1'$2'",
     "Wrap JSON-like values in single quotes",
   ],
