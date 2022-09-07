@@ -1,6 +1,6 @@
 {
   "name": "generate-dotenv",
-  "version": "1.2.1",
+  "version": "0.1.4",
   "private": true,
   "description": "Generates a dotenv file within GitHub Actions.",
   "main": "dist/index.js",
