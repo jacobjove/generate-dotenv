@@ -60555,7 +60555,9 @@ function prepareEnv({ template, }) {
         }
         if (missingKeys.length) {
             core.setFailed(`Missing environment variables: ${missingKeys.join(", ")}`);
+            return { ok: false };
         }
+        return { ok: true };
     });
 }
 exports.prepareEnv = prepareEnv;
@@ -60632,7 +60634,11 @@ const POSTPROCESSING_REPLACEMENT_PATTERNS = [
 ];
 function generateDotEnvFile({ template, outputPath, }) {
     return __awaiter(this, void 0, void 0, function* () {
-        yield (0, env_1.prepareEnv)({ template });
+        const { ok } = yield (0, env_1.prepareEnv)({ template });
+        if (!ok) {
+            core.setFailed("Unable to prepare environment for dotenv file generation.");
+            return;
+        }
         core.info("Generating dotenv file ...");
         (0, child_process_1.execSync)(`echo "${template}" | envsubst > ${outputPath}`, {
             env: process.env,

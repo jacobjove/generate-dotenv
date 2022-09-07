@@ -2,11 +2,15 @@ import * as core from "@actions/core";
 import * as dotenv from "dotenv";
 import { generateTemplate } from "./template";
 
+interface Result {
+  ok: boolean;
+}
+
 export async function prepareEnv({
   template,
 }: {
   template: Awaited<ReturnType<typeof generateTemplate>>;
-}): Promise<void> {
+}): Promise<Result> {
   core.info("Preparing environment ...");
   const envObject = dotenv.parse(template);
   const missingKeys: string[] = [];
@@ -21,5 +25,7 @@ export async function prepareEnv({
   }
   if (missingKeys.length) {
     core.setFailed(`Missing environment variables: ${missingKeys.join(", ")}`);
+    return { ok: false };
   }
+  return { ok: true };
 }

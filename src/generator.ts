@@ -33,7 +33,11 @@ export async function generateDotEnvFile({
   template,
   outputPath,
 }: { template: string } & Pick<Inputs, "outputPath">): Promise<void> {
-  await prepareEnv({ template });
+  const { ok } = await prepareEnv({ template });
+  if (!ok) {
+    core.setFailed("Unable to prepare environment for dotenv file generation.");
+    return;
+  }
   core.info("Generating dotenv file ...");
   execSync(`echo "${template}" | envsubst > ${outputPath}`, {
     env: process.env,
