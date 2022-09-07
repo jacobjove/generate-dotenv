@@ -61033,7 +61033,12 @@ function generateDotEnvFile({ template, outputPath, }) {
                 const wrappedObscuredValue = `${wrapperCharacter}${obscuredValue}${wrapperCharacter}`;
                 core.warning(`${match[0].replace(match[2], obscuredValue)} --> ${match[0].replace(match[2], wrappedObscuredValue)}`);
             }
-            processedFileContents = processedFileContents.replace(pattern, replacement);
+            processedFileContents = processedFileContents
+                .replace(pattern, replacement)
+                .trim();
+        }
+        if (!processedFileContents) {
+            core.warning("The generated dotenv file is empty.");
         }
         fs.writeFileSync(outputPath, processedFileContents);
         // grep -P -q '^[A-Z_]+?=$' .env && echo "Found empty var name: $(grep -P '^[A-Z_]+?=$' .env)" && exit 1
@@ -61206,12 +61211,15 @@ function generateTemplate({ templatePaths, }) {
             template = (0, fs_1.readFileSync)(templatePaths[0], "utf8");
         }
         else if (templatePaths.length > 1) {
-            (0, child_process_1.exec)(`sort -u -t '=' -k 1,1 ${templatePaths.reverse().join(" ")}`, (error, stdout, stderr) => {
-                core.info(stderr);
-                if (error)
-                    core.setFailed(error.message);
-                template = stdout;
-            });
+            try {
+                (0, child_process_1.execSync)(`sort -u -t '=' -k 1,1 ${templatePaths.reverse().join(" ")}`, {
+                    shell: "/bin/bash",
+                    stdio: "inherit",
+                });
+            }
+            catch (err) {
+                core.setFailed(err instanceof Error ? err.message : `${err}`);
+            }
         }
         else {
             core.setFailed("No template paths provided");

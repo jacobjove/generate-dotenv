@@ -66,7 +66,12 @@ export async function generateDotEnvFile({
         )}`
       );
     }
-    processedFileContents = processedFileContents.replace(pattern, replacement);
+    processedFileContents = processedFileContents
+      .replace(pattern, replacement)
+      .trim();
+  }
+  if (!processedFileContents) {
+    core.warning("The generated dotenv file is empty.");
   }
   fs.writeFileSync(outputPath, processedFileContents);
   // grep -P -q '^[A-Z_]+?=$' .env && echo "Found empty var name: $(grep -P '^[A-Z_]+?=$' .env)" && exit 1

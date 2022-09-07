@@ -1,5 +1,5 @@
 import * as core from "@actions/core";
-import { exec } from "child_process";
+import { execSync } from "child_process";
 import { readFileSync } from "fs";
 import { Inputs } from "./inputs";
 
@@ -10,14 +10,14 @@ export async function generateTemplate({
   if (templatePaths.length === 1) {
     template = readFileSync(templatePaths[0], "utf8");
   } else if (templatePaths.length > 1) {
-    exec(
-      `sort -u -t '=' -k 1,1 ${templatePaths.reverse().join(" ")}`,
-      (error, stdout, stderr) => {
-        core.info(stderr);
-        if (error) core.setFailed(error.message);
-        template = stdout;
-      }
-    );
+    try {
+      execSync(`sort -u -t '=' -k 1,1 ${templatePaths.reverse().join(" ")}`, {
+        shell: "/bin/bash",
+        stdio: "inherit",
+      });
+    } catch (err) {
+      core.setFailed(err instanceof Error ? err.message : `${err}`);
+    }
   } else {
     core.setFailed("No template paths provided");
   }
