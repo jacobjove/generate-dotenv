@@ -60544,12 +60544,13 @@ function prepareEnv({ template, }) {
         core.info("Preparing environment ...");
         const envObject = dotenv.parse(template);
         const missingKeys = [];
-        for (const [key, value] of Object.entries(envObject)) {
-            const valueIsUndefined = value === undefined ||
-                (typeof value === "string" && value.startsWith("$"));
-            if (valueIsUndefined && !process.env[key]) {
-                core.warning(`Environment variable ${key} is not set`);
-                missingKeys.push(key);
+        for (const [, value] of Object.entries(envObject)) {
+            if (typeof value === "string" && value.startsWith("$")) {
+                const envKey = value.replace(/\${?(.+?)\}?$/, "$1");
+                if (!process.env[envKey]) {
+                    core.warning(`Environment variable ${envKey} is not set`);
+                    missingKeys.push(envKey);
+                }
             }
         }
         if (missingKeys.length) {
