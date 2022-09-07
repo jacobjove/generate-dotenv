@@ -3,4 +3,4 @@
 
 npx lint-staged
 npm run package && git add dist
-# npm test
+npm run test

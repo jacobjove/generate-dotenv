@@ -60609,14 +60609,14 @@ const POSTPROCESSING_REPLACEMENT_PATTERNS = [
     // Wrap values containing dollar signs in single quotes to prevent
     // unintended substitutions when the dotenv file is read by a shell.
     [
-        /(^[A-Z_]+?=)([^\n"']+?[$][^"']+)$/gm,
+        /(^[A-Z_]+?=)([^\n"']+?[$][^\n"']+?)$/gm,
         "$1'$2'",
         "Wrap values containing dollar signs in single quotes",
     ],
     // Wrap values containing spaces and/or parentheses in double quotes
     // if they are not already wrapped in double/single quotes.
     [
-        /(^[A-Z_]+?=)([^\n"']+?[\s\(\)][^"]+)$/gm,
+        /(^[A-Z_]+?=)([^\n"']+?[ \(\)][^\n"]+?)$/gm,
         '$1"$2"',
         "Wrap values containing spaces and/or parentheses in double quotes",
     ],
@@ -60624,7 +60624,7 @@ const POSTPROCESSING_REPLACEMENT_PATTERNS = [
     // ending with a closing curly bracket) in single quotes because we
     // assume them to contain both spaces and double quotes.
     [
-        /(^[A-Z_]+?=)([\{]["\s]+?[^.]+[\}])$/gm,
+        /(^[A-Z_]+?=)([\{][" ]+?[^.]+[\}])$/gm,
         "$1'$2'",
         "Wrap JSON-like values in single quotes",
     ],
@@ -60638,25 +60638,22 @@ function generateDotEnvFile({ template, outputPath, }) {
         });
         // Post-process the file to ensure that values with spaces are wrapped in quotes, etc.
         // so that the file can be sourced without errors.
-        fs.readFile(outputPath, "utf8", (errReading, data) => {
-            if (errReading)
-                core.setFailed(errReading.message);
-            let processedFileContents = data;
-            for (const [pattern, replacement, description,] of POSTPROCESSING_REPLACEMENT_PATTERNS) {
-                core.info(`Running post-processor: "${description}"`);
-                for (const match of processedFileContents.matchAll(pattern)) {
-                    const wrapperCharacter = replacement[replacement.length - 1];
-                    const obscuredValue = "*****";
-                    const wrappedObscuredValue = `${wrapperCharacter}${obscuredValue}${wrapperCharacter}`;
-                    core.warning(`${match[0].replace(match[2], obscuredValue)} --> ${match[0].replace(match[2], wrappedObscuredValue)}`);
-                }
-                processedFileContents = processedFileContents.replace(pattern, replacement);
+        let processedFileContents = fs
+            .readFileSync(outputPath, "utf-8")
+            .split(/\n/)
+            .map((line) => line.trim())
+            .join("\n");
+        for (const [pattern, replacement, description,] of POSTPROCESSING_REPLACEMENT_PATTERNS) {
+            core.info(`Running post-processor: "${description}"`);
+            for (const match of processedFileContents.matchAll(pattern)) {
+                const wrapperCharacter = replacement[replacement.length - 1];
+                const obscuredValue = "*****";
+                const wrappedObscuredValue = `${wrapperCharacter}${obscuredValue}${wrapperCharacter}`;
+                core.warning(`${match[0].replace(match[2], obscuredValue)} --> ${match[0].replace(match[2], wrappedObscuredValue)}`);
             }
-            fs.writeFile(outputPath, processedFileContents, "utf8", function (errWriting) {
-                if (errWriting)
-                    core.setFailed(errWriting.message);
-            });
-        });
+            processedFileContents = processedFileContents.replace(pattern, replacement);
+        }
+        fs.writeFileSync(outputPath, processedFileContents);
         // grep -P -q '^[A-Z_]+?=$' .env && echo "Found empty var name: $(grep -P '^[A-Z_]+?=$' .env)" && exit 1
     });
 }
@@ -60822,7 +60819,6 @@ const child_process_1 = __nccwpck_require__(2081);
 const fs_1 = __nccwpck_require__(7147);
 function generateTemplate({ templatePaths, }) {
     return __awaiter(this, void 0, void 0, function* () {
-        core.info("Generating dotenv file ...");
         let template = "";
         if (templatePaths.length === 1) {
             template = (0, fs_1.readFileSync)(templatePaths[0], "utf8");

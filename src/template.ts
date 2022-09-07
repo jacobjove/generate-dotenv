@@ -6,7 +6,6 @@ import { Inputs } from "./inputs";
 export async function generateTemplate({
   templatePaths,
 }: Pick<Inputs, "templatePaths">): Promise<string> {
-  core.info("Generating dotenv file ...");
   let template = "";
   if (templatePaths.length === 1) {
     template = readFileSync(templatePaths[0], "utf8");
