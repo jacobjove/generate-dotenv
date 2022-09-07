@@ -8,14 +8,14 @@ const POSTPROCESSING_REPLACEMENT_PATTERNS: [RegExp, string, string][] = [
   // Wrap values containing dollar signs in single quotes to prevent
   // unintended substitutions when the dotenv file is read by a shell.
   [
-    /(^[A-Z_]+?=)([^\n\"\']+?[\$][^\n\"\']+)/g,
+    /(^[A-Z_]+?=)([^\n"']+?[$][^"']+)$/gm,
     "$1'$2'",
     "Wrap values containing dollar signs in single quotes",
   ],
   // Wrap values containing spaces and/or parentheses in double quotes
   // if they are not already wrapped in double/single quotes.
   [
-    /(^[A-Z_]+?=)([^\n\"\']+?[\ \(\)][^\n\"]+)/g,
+    /(^[A-Z_]+?=)([^\n"']+?[\s\(\)][^"]+)$/gm,
     '$1"$2"',
     "Wrap values containing spaces and/or parentheses in double quotes",
   ],
@@ -23,7 +23,7 @@ const POSTPROCESSING_REPLACEMENT_PATTERNS: [RegExp, string, string][] = [
   // ending with a closing curly bracket) in single quotes because we
   // assume them to contain both spaces and double quotes.
   [
-    /(^[A-Z_]+?=)([\{][\"\ ]+?[^.]+[\}])/g,
+    /(^[A-Z_]+?=)([\{]["\s]+?[^.]+[\}])$/gm,
     "$1'$2'",
     "Wrap JSON-like values in single quotes",
   ],
@@ -40,31 +40,39 @@ export async function generateDotEnvFile({
   });
   // Post-process the file to ensure that values with spaces are wrapped in quotes, etc.
   // so that the file can be sourced without errors.
-  fs.readFile(outputPath, "utf8", (err, data) => {
-    if (err) core.setFailed(err.message);
+  fs.readFile(outputPath, "utf8", (errReading, data) => {
+    if (errReading) core.setFailed(errReading.message);
     let processedFileContents = data;
-    POSTPROCESSING_REPLACEMENT_PATTERNS.forEach(
-      ([pattern, replacement, description]) => {
-        core.info(`Running post-processing replacement: "${description}"`);
-        for (const match of processedFileContents.matchAll(pattern)) {
-          core.warning(
-            `${match[0].replace(match[2], "*****")}\n` +
-              `-->\n` +
-              `${match[0].replace(
-                match[2],
-                replacement[0] + "*****" + replacement[replacement.length - 1]
-              )}`
-          );
-        }
-        processedFileContents = processedFileContents.replace(
-          pattern,
-          replacement
+    for (const [
+      pattern,
+      replacement,
+      description,
+    ] of POSTPROCESSING_REPLACEMENT_PATTERNS) {
+      core.info(`Running post-processor: "${description}"`);
+      for (const match of processedFileContents.matchAll(pattern)) {
+        const wrapperCharacter = replacement[replacement.length - 1];
+        const obscuredValue = "*****";
+        const wrappedObscuredValue = `${wrapperCharacter}${obscuredValue}${wrapperCharacter}`;
+        core.warning(
+          `${match[0].replace(match[2], obscuredValue)} --> ${match[0].replace(
+            match[2],
+            wrappedObscuredValue
+          )}`
         );
       }
+      processedFileContents = processedFileContents.replace(
+        pattern,
+        replacement
+      );
+    }
+    fs.writeFile(
+      outputPath,
+      processedFileContents,
+      "utf8",
+      function (errWriting) {
+        if (errWriting) core.setFailed(errWriting.message);
+      }
     );
-    fs.writeFile(outputPath, processedFileContents, "utf8", function (err) {
-      if (err) core.setFailed(err.message);
-    });
   });
   // grep -P -q '^[A-Z_]+?=$' .env && echo "Found empty var name: $(grep -P '^[A-Z_]+?=$' .env)" && exit 1
 }

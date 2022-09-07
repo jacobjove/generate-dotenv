@@ -1,8 +1,8 @@
+import { execSync } from "child_process";
 import fs from "fs";
 import path from "path";
-import readline from "readline";
-import { execSync } from "child_process";
 import { generateDotEnvFile } from "../src/generator";
+import { generateTemplate } from "../src/template";
 
 const DOTENV_TEMPLATE_LINES = [
   "VAR_C=${VAR_C}",
@@ -21,14 +21,14 @@ test("test if output value from action is same file as expected", async () => {
   process.env.VAR_C = "c";
   const templateFileContent = DOTENV_TEMPLATE_LINES.join("\n");
   fs.writeFileSync(TEMPLATE_PATH, templateFileContent);
+  const template = await generateTemplate({ templatePaths: [TEMPLATE_PATH] });
   await generateDotEnvFile({
-    templatePath: TEMPLATE_PATH,
+    template,
     outputPath: OUTPUT_PATH,
   });
-  fs.readFileSync(OUTPUT_PATH, "utf8")
-    .split("\n")
-    .forEach((line, index) => {
-      expect(line).toEqual(DOTENV_LINES[index]);
-    });
+  const dotEnvLines = fs.readFileSync(OUTPUT_PATH, "utf-8").split("\n");
+  for (const [line, index] of dotEnvLines.entries()) {
+    expect(line).toEqual(DOTENV_LINES[index]);
+  }
   execSync(`find ${__dirname} -name "*.tmp" -type f -delete`);
 });

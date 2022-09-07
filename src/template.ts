@@ -1,13 +1,13 @@
 import * as core from "@actions/core";
-import { Inputs } from "./inputs";
 import { exec } from "child_process";
 import { readFileSync } from "fs";
+import { Inputs } from "./inputs";
 
 export async function generateTemplate({
   templatePaths,
 }: Pick<Inputs, "templatePaths">): Promise<string> {
   core.info("Generating dotenv file ...");
-  let template: string = "";
+  let template = "";
   if (templatePaths.length === 1) {
     template = readFileSync(templatePaths[0], "utf8");
   } else if (templatePaths.length > 1) {

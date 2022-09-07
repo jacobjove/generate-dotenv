@@ -60484,6 +60484,10 @@ function restoreDotEnvFromCache({ cacheKey, outputPath, }) {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
         const pathsToRestore = [outputPath];
+        // TODO: Add note in README that we use this environment variable.
+        // Caches are downloaded in multiple segments, and sometimes a segment download gets stuck,
+        // causing the job to be stuck forever and eventually fail. The default timeout is 60 minutes,
+        // which is excessive for our use case, so here we set the timeout to 15 minutes by default.
         process.env.SEGMENT_DOWNLOAD_TIMEOUT_MINS =
             (_a = process.env.SEGMENT_DOWNLOAD_TIMEOUT_MINS) !== null && _a !== void 0 ? _a : "15";
         return (0, cache_1.restoreCache)(pathsToRestore, cacheKey);
@@ -60540,14 +60544,14 @@ function prepareEnv({ template, }) {
         core.info("Preparing environment ...");
         const envObject = dotenv.parse(template);
         const missingKeys = [];
-        Object.entries(envObject).forEach(([key, value]) => {
+        for (const [key, value] of Object.entries(envObject)) {
             const valueIsUndefined = value === undefined ||
                 (typeof value === "string" && value.startsWith("$"));
             if (valueIsUndefined && !process.env[key]) {
                 core.warning(`Environment variable ${key} is not set`);
                 missingKeys.push(key);
             }
-        });
+        }
         if (missingKeys.length) {
             core.setFailed(`Missing environment variables: ${missingKeys.join(", ")}`);
         }
@@ -60602,18 +60606,25 @@ const child_process_1 = __nccwpck_require__(2081);
 const fs = __importStar(__nccwpck_require__(7147));
 const env_1 = __nccwpck_require__(1996);
 const POSTPROCESSING_REPLACEMENT_PATTERNS = [
+    // Wrap values containing dollar signs in single quotes to prevent
+    // unintended substitutions when the dotenv file is read by a shell.
     [
-        /(^[A-Z_]+?=)([^\n\"\']+?[\$][^\n\"\']+)/g,
+        /(^[A-Z_]+?=)([^\n"']+?[$][^"']+)$/gm,
         "$1'$2'",
         "Wrap values containing dollar signs in single quotes",
     ],
+    // Wrap values containing spaces and/or parentheses in double quotes
+    // if they are not already wrapped in double/single quotes.
     [
-        /(^[A-Z_]+?=)([^\n\"\']+?[\ \(\)][^\n\"]+)/g,
+        /(^[A-Z_]+?=)([^\n"']+?[\s\(\)][^"]+)$/gm,
         '$1"$2"',
         "Wrap values containing spaces and/or parentheses in double quotes",
     ],
+    // Wrap JSON-like values (beginning with an opening curly bracket and
+    // ending with a closing curly bracket) in single quotes because we
+    // assume them to contain both spaces and double quotes.
     [
-        /(^[A-Z_]+?=)([\{][\"\ ]+?[^.]+[\}])/g,
+        /(^[A-Z_]+?=)([\{]["\s]+?[^.]+[\}])$/gm,
         "$1'$2'",
         "Wrap JSON-like values in single quotes",
     ],
@@ -60625,24 +60636,28 @@ function generateDotEnvFile({ template, outputPath, }) {
         (0, child_process_1.execSync)(`echo "${template}" | envsubst > ${outputPath}`, {
             env: process.env,
         });
-        fs.readFile(outputPath, "utf8", (err, data) => {
-            if (err)
-                core.setFailed(err.message);
+        // Post-process the file to ensure that values with spaces are wrapped in quotes, etc.
+        // so that the file can be sourced without errors.
+        fs.readFile(outputPath, "utf8", (errReading, data) => {
+            if (errReading)
+                core.setFailed(errReading.message);
             let processedFileContents = data;
-            POSTPROCESSING_REPLACEMENT_PATTERNS.forEach(([pattern, replacement, description]) => {
-                core.info(`Running post-processing replacement: "${description}"`);
+            for (const [pattern, replacement, description,] of POSTPROCESSING_REPLACEMENT_PATTERNS) {
+                core.info(`Running post-processor: "${description}"`);
                 for (const match of processedFileContents.matchAll(pattern)) {
-                    core.warning(`${match[0].replace(match[2], "*****")}\n` +
-                        `-->\n` +
-                        `${match[0].replace(match[2], replacement[0] + "*****" + replacement[replacement.length - 1])}`);
+                    const wrapperCharacter = replacement[replacement.length - 1];
+                    const obscuredValue = "*****";
+                    const wrappedObscuredValue = `${wrapperCharacter}${obscuredValue}${wrapperCharacter}`;
+                    core.warning(`${match[0].replace(match[2], obscuredValue)} --> ${match[0].replace(match[2], wrappedObscuredValue)}`);
                 }
                 processedFileContents = processedFileContents.replace(pattern, replacement);
-            });
-            fs.writeFile(outputPath, processedFileContents, "utf8", function (err) {
-                if (err)
-                    core.setFailed(err.message);
+            }
+            fs.writeFile(outputPath, processedFileContents, "utf8", function (errWriting) {
+                if (errWriting)
+                    core.setFailed(errWriting.message);
             });
         });
+        // grep -P -q '^[A-Z_]+?=$' .env && echo "Found empty var name: $(grep -P '^[A-Z_]+?=$' .env)" && exit 1
     });
 }
 exports.generateDotEnvFile = generateDotEnvFile;
@@ -60682,12 +60697,13 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.readInputs = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 function readInputs() {
+    // core.info("Reading inputs...");
     const templatePaths = core
         .getInput("template-paths")
         .trim()
         .split(/[\s\n]+/);
     const outputPath = core.getInput("output-path");
-    const cache = core.getBooleanInput("cache", { required: false });
+    const cache = core.getBooleanInput("cache", { required: false }); // default: true (specified in action.yml)
     const cacheKey = core.getInput("cache-key", { required: false }) ||
         `dotenv-${process.env.GITHUB_SHA}-${templatePaths.join("-")}`;
     return { templatePaths, outputPath, cache, cacheKey };

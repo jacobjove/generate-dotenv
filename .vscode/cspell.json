@@ -1,5 +1,5 @@
 {
   "language": "en",
-  "words": ["dotenv", "envsubst"],
+  "words": ["camelcase", "dotenv", "envsubst"],
   "flagWords": ["hte"]
 }
