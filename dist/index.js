@@ -61056,6 +61056,77 @@ exports.generateDotEnvFile = generateDotEnvFile;
 
 /***/ }),
 
+/***/ 1449:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.hashFiles = void 0;
+const core = __importStar(__nccwpck_require__(2186));
+const crypto = __importStar(__nccwpck_require__(6113));
+const fs = __importStar(__nccwpck_require__(7147));
+const path = __importStar(__nccwpck_require__(1017));
+const stream = __importStar(__nccwpck_require__(2781));
+const util = __importStar(__nccwpck_require__(3837));
+function hashFiles(paths) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const result = crypto.createHash("sha256");
+        for (const filepath of paths) {
+            if (!filepath.startsWith(`${process.env.GITHUB_WORKSPACE}${path.sep}`)) {
+                core.warning(`Ignoring ${filepath} because it is not within the workspace.`);
+                continue;
+            }
+            if (fs.statSync(filepath).isDirectory()) {
+                core.warning(`Skipping directory '${filepath}'`);
+                continue;
+            }
+            const hash = crypto.createHash("sha256");
+            const pipeline = util.promisify(stream.pipeline);
+            yield pipeline(fs.createReadStream(filepath), hash);
+            result.write(hash.digest());
+        }
+        result.end();
+        return result.digest("hex");
+    });
+}
+exports.hashFiles = hashFiles;
+
+
+/***/ }),
+
 /***/ 7063:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -61084,20 +61155,36 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.readInputs = void 0;
 const core = __importStar(__nccwpck_require__(2186));
+const hashFiles_1 = __nccwpck_require__(1449);
 function readInputs() {
-    // core.info("Reading inputs...");
-    const templatePaths = core
-        .getInput("template-paths")
-        .trim()
-        .split(/[\s\n]+/);
-    const outputPath = core.getInput("output-path");
-    const cache = core.getBooleanInput("cache", { required: false }); // default: true (specified in action.yml)
-    const cacheKey = core.getInput("cache-key", { required: false }) ||
-        `dotenv-${process.env.GITHUB_SHA}-${templatePaths.join("-")}`;
-    return { templatePaths, outputPath, cache, cacheKey };
+    return __awaiter(this, void 0, void 0, function* () {
+        // core.info("Reading inputs...");
+        const templatePaths = core
+            .getInput("template-paths")
+            .trim()
+            .split(/[\s\n]+/);
+        const templatePathsHashPromise = (0, hashFiles_1.hashFiles)(templatePaths);
+        const outputPath = core.getInput("output-path");
+        const cache = core.getBooleanInput("cache", { required: false }); // default: true (specified in action.yml)
+        const templatePathsHash = yield templatePathsHashPromise;
+        // TODO: Technically, the dotenv file could still differ if the same template paths
+        // are specified in a different order... but that's a pretty unlikely scenario.
+        const cacheKey = core.getInput("cache-key", { required: false }) ||
+            `dotenv-${process.env.GITHUB_SHA}-${templatePathsHash}`;
+        return { templatePaths, outputPath, cache, cacheKey };
+    });
 }
 exports.readInputs = readInputs;
 
@@ -61149,7 +61236,7 @@ const inputs_1 = __nccwpck_require__(7063);
 const template_1 = __nccwpck_require__(3932);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
-        const { cache: useCache, cacheKey, templatePaths, outputPath } = (0, inputs_1.readInputs)();
+        const { cache: useCache, cacheKey, templatePaths, outputPath, } = yield (0, inputs_1.readInputs)();
         if (useCache) {
             const restoredCacheKey = yield (0, cache_1.restoreDotEnvFromCache)({
                 cacheKey,
@@ -61166,7 +61253,9 @@ function run() {
         const template = yield (0, template_1.generateTemplate)({ templatePaths });
         yield (0, generator_1.generateDotEnvFile)({ template, outputPath });
         if (useCache) {
-            (0, cache_1.saveDotEnvToCache)({ cacheKey, outputPath });
+            core.info(`Saving ${outputPath} to cache...`);
+            yield (0, cache_1.saveDotEnvToCache)({ cacheKey, outputPath });
+            core.info(`Saved ${outputPath} to cache with key: ${cacheKey}`);
         }
     });
 }
