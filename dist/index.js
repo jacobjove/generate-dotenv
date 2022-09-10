@@ -61107,7 +61107,7 @@ function hashFiles(paths) {
             throw new Error("GITHUB_WORKSPACE is not set.");
         const result = crypto.createHash("sha256");
         for (const filepath of paths) {
-            const absolutePath = filepath.startsWith(process.env.GITHUB_WORKSPACE)
+            const absolutePath = !filepath.startsWith(process.env.GITHUB_WORKSPACE)
                 ? path.resolve(process.env.GITHUB_WORKSPACE, filepath)
                 : filepath;
             if (!fs.existsSync(absolutePath)) {
