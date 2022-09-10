@@ -14,6 +14,7 @@ export async function readInputs(): Promise<Inputs> {
     .getInput("template-paths")
     .trim()
     .split(/[\s\n]+/);
+  core.info(`Template paths: ${templatePaths}`);
   const templatePathsHashPromise = hashFiles(templatePaths);
   const outputPath = core.getInput("output-path");
   const cache = core.getBooleanInput("cache", { required: false }); // default: true (specified in action.yml)

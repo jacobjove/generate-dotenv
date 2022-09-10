@@ -61175,6 +61175,7 @@ function readInputs() {
             .getInput("template-paths")
             .trim()
             .split(/[\s\n]+/);
+        core.info(`Template paths: ${templatePaths}`);
         const templatePathsHashPromise = (0, hashFiles_1.hashFiles)(templatePaths);
         const outputPath = core.getInput("output-path");
         const cache = core.getBooleanInput("cache", { required: false }); // default: true (specified in action.yml)
