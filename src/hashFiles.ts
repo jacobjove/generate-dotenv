@@ -7,7 +7,7 @@ import * as util from "util";
 
 export async function hashFiles(paths: string[]): Promise<string> {
   if (!process.env.GITHUB_WORKSPACE)
-    throw new Error("GITHUB_WORKSPACE not set");
+    throw new Error("GITHUB_WORKSPACE is not set.");
   const result = crypto.createHash("sha256");
   for (const filepath of paths) {
     const absolutePath = filepath.startsWith(process.env.GITHUB_WORKSPACE)
@@ -17,10 +17,10 @@ export async function hashFiles(paths: string[]): Promise<string> {
       core.setFailed(
         `${absolutePath} does not exist. Please confirm that each specified template path is within the workspace.`
       );
-      process.exit(1);
+      continue;
     }
-    if (fs.statSync(filepath).isDirectory()) {
-      core.warning(`Skipping directory '${filepath}'`);
+    if (fs.statSync(absolutePath).isDirectory()) {
+      core.setFailed(`'${filepath}' is a directory`);
       continue;
     }
     const hash = crypto.createHash("sha256");

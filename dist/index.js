@@ -61104,7 +61104,7 @@ const util = __importStar(__nccwpck_require__(3837));
 function hashFiles(paths) {
     return __awaiter(this, void 0, void 0, function* () {
         if (!process.env.GITHUB_WORKSPACE)
-            throw new Error("GITHUB_WORKSPACE not set");
+            throw new Error("GITHUB_WORKSPACE is not set.");
         const result = crypto.createHash("sha256");
         for (const filepath of paths) {
             const absolutePath = filepath.startsWith(process.env.GITHUB_WORKSPACE)
@@ -61112,10 +61112,10 @@ function hashFiles(paths) {
                 : filepath;
             if (!fs.existsSync(absolutePath)) {
                 core.setFailed(`${absolutePath} does not exist. Please confirm that each specified template path is within the workspace.`);
-                process.exit(1);
+                continue;
             }
-            if (fs.statSync(filepath).isDirectory()) {
-                core.warning(`Skipping directory '${filepath}'`);
+            if (fs.statSync(absolutePath).isDirectory()) {
+                core.setFailed(`'${filepath}' is a directory`);
                 continue;
             }
             const hash = crypto.createHash("sha256");
