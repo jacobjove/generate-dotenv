@@ -61019,7 +61019,7 @@ function generateDotEnvFile({ template, outputPath, }) {
         const { ok } = yield (0, env_1.prepareEnv)({ template });
         if (!ok) {
             core.setFailed("Unable to prepare environment for dotenv file generation.");
-            return;
+            return false;
         }
         core.info("Generating dotenv file ...");
         (0, child_process_1.execSync)(`echo "${template}" | envsubst > ${outputPath}`, {
@@ -61048,6 +61048,7 @@ function generateDotEnvFile({ template, outputPath, }) {
             core.warning("The generated dotenv file is empty.");
         }
         fs.writeFileSync(outputPath, processedFileContents);
+        return true;
         // grep -P -q '^[A-Z_]+?=$' .env && echo "Found empty var name: $(grep -P '^[A-Z_]+?=$' .env)" && exit 1
     });
 }
@@ -61257,7 +61258,9 @@ function run() {
             }
         }
         const template = yield (0, template_1.generateTemplate)({ templatePaths });
-        yield (0, generator_1.generateDotEnvFile)({ template, outputPath });
+        const generated = yield (0, generator_1.generateDotEnvFile)({ template, outputPath });
+        if (!generated)
+            return;
         if (useCache) {
             core.info(`Saving ${outputPath} to cache...`);
             yield (0, cache_1.saveDotEnvToCache)({ cacheKey, outputPath });

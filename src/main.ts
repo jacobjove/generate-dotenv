@@ -24,7 +24,8 @@ async function run(): Promise<void> {
     }
   }
   const template = await generateTemplate({ templatePaths });
-  await generateDotEnvFile({ template, outputPath });
+  const generated = await generateDotEnvFile({ template, outputPath });
+  if (!generated) return;
   if (useCache) {
     core.info(`Saving ${outputPath} to cache...`);
     await saveDotEnvToCache({ cacheKey, outputPath });

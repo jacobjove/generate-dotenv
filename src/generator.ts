@@ -32,11 +32,11 @@ const POSTPROCESSING_REPLACEMENT_PATTERNS: [RegExp, string, string][] = [
 export async function generateDotEnvFile({
   template,
   outputPath,
-}: { template: string } & Pick<Inputs, "outputPath">): Promise<void> {
+}: { template: string } & Pick<Inputs, "outputPath">): Promise<boolean> {
   const { ok } = await prepareEnv({ template });
   if (!ok) {
     core.setFailed("Unable to prepare environment for dotenv file generation.");
-    return;
+    return false;
   }
   core.info("Generating dotenv file ...");
   execSync(`echo "${template}" | envsubst > ${outputPath}`, {
@@ -74,5 +74,6 @@ export async function generateDotEnvFile({
     core.warning("The generated dotenv file is empty.");
   }
   fs.writeFileSync(outputPath, processedFileContents);
+  return true;
   // grep -P -q '^[A-Z_]+?=$' .env && echo "Found empty var name: $(grep -P '^[A-Z_]+?=$' .env)" && exit 1
 }
