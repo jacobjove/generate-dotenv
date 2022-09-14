@@ -5,6 +5,18 @@ import { prepareEnv } from "./env";
 import { Inputs } from "./inputs";
 
 const POSTPROCESSING_REPLACEMENT_PATTERNS: [RegExp, string, string][] = [
+  // Remove duplicated quotes marks, in case a template file explicitly
+  // wraps a value in quotes when the value itself is already quoted.
+  [
+    /(^[A-Z_]+?=)"(".+")"$/gm,
+    "$1$2",
+    "Remove duplicate double quotes from the beginning and end of values",
+  ],
+  [
+    /(^[A-Z_]+?=)'('.+')'$/gm,
+    "$1$2",
+    "Remove duplicate single quotes from the beginning and end of values",
+  ],
   // Wrap values containing dollar signs in single quotes to prevent
   // unintended substitutions when the dotenv file is read by a shell.
   [

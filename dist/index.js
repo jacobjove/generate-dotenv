@@ -60991,6 +60991,18 @@ const child_process_1 = __nccwpck_require__(2081);
 const fs = __importStar(__nccwpck_require__(7147));
 const env_1 = __nccwpck_require__(1996);
 const POSTPROCESSING_REPLACEMENT_PATTERNS = [
+    // Remove duplicated quotes marks, in case a template file explicitly
+    // wraps a value in quotes when the value itself is already quoted.
+    [
+        /(^[A-Z_]+?=)"(".+")"$/gm,
+        "$1$2",
+        "Remove duplicate double quotes from the beginning and end of values",
+    ],
+    [
+        /(^[A-Z_]+?=)'('.+')'$/gm,
+        "$1$2",
+        "Remove duplicate single quotes from the beginning and end of values",
+    ],
     // Wrap values containing dollar signs in single quotes to prevent
     // unintended substitutions when the dotenv file is read by a shell.
     [
