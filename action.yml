@@ -19,6 +19,9 @@ inputs:
   cache-key:
     description: "Key used to cache the dotenv file (default: concatenation of the template paths and the GITHUB_SHA env var)"
     required: false
+outputs:
+  cache-key:
+    description: "Key used to cache the dotenv file"
 runs:
   using: "node16"
   main: "dist/index.js"
