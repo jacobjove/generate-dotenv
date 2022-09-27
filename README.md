@@ -38,6 +38,12 @@ The path of the output dotenv file. Default: `'.env'`
 If `cache-key` is not specified, a cache key is computed by concatenating the template paths
 and the `GITHUB_SHA` environment variable.
 
+## Outputs
+
+### `cache-key`
+
+The key used to cache the dotenv file (if caching is not disabled), or null (if caching is disabled).
+
 ## Example usage
 
 ### `.github/workflows/[workflow].yml`

@@ -61278,6 +61278,7 @@ function run() {
             yield (0, cache_1.saveDotEnvToCache)({ cacheKey, outputPath });
             core.info(`Saved ${outputPath} to cache with key: ${cacheKey}`);
         }
+        core.setOutput("cache-key", useCache ? cacheKey : null);
     });
 }
 run();
