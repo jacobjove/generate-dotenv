@@ -1,7 +1,0 @@
-{
-  "extends": "./tsconfig.base.json",
-  "compilerOptions": {
-    "rootDir": "./src" /* Specify the root directory of input files. Use to control the output directory structure with --outDir. */
-  },
-  "exclude": ["node_modules", "**/*.test.ts", "jest.config.ts"]
-}
