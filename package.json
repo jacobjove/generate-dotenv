@@ -30,9 +30,11 @@
   "dependencies": {
     "@actions/cache": "^3.0.4",
     "@actions/core": "^1.9.1",
+    "crypto-js": "^4.1.1",
     "dotenv": "^16.0.2"
   },
   "devDependencies": {
+    "@types/crypto-js": "^4.1.1",
     "@types/jest": "^27.4.0",
     "@types/node": "^18.7.16",
     "@typescript-eslint/parser": "^5.36.2",

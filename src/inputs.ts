@@ -1,5 +1,9 @@
 import * as core from "@actions/core";
+import { AES } from "crypto-js";
 import { hashFiles } from "./hashFiles";
+
+// https://docs.github.com/en/actions/using-workflows/caching-dependencies-to-speed-up-workflows#input-parameters-for-the-cache-action
+const CACHE_KEY_MAX_LENGTH = 512;
 
 export interface Inputs {
   templatePaths: string[];
@@ -15,14 +19,30 @@ export async function readInputs(): Promise<Inputs> {
     .trim()
     .split(/[\s\n]+/);
   core.info(`Template paths: ${templatePaths}`);
-  const templatePathsHashPromise = hashFiles(templatePaths);
   const outputPath = core.getInput("output-path");
   const cache = core.getBooleanInput("cache", { required: false }); // default: true (specified in action.yml)
-  const templatePathsHash = await templatePathsHashPromise;
+  const cacheKey = cache
+    ? core.getInput("cache-key", { required: false }) ||
+      (await createCacheKey(templatePaths))
+    : "";
+  return { templatePaths, outputPath, cache, cacheKey };
+}
+
+async function createCacheKey(templatePaths: string[]): Promise<string> {
+  if (!process.env.GITHUB_SHA) throw new Error("GITHUB_SHA is not set.");
   // TODO: Technically, the dotenv file could still differ if the same template paths
   // are specified in a different order... but that's a pretty unlikely scenario.
-  const cacheKey =
-    core.getInput("cache-key", { required: false }) ||
-    `dotenv-${process.env.GITHUB_SHA}-${templatePathsHash}`;
-  return { templatePaths, outputPath, cache, cacheKey };
+  const templatePathsHash = await hashFiles(templatePaths);
+  // Create the cache key by encrypting the template paths hash with the SHA.
+  // This is to prevent GitHub Actions from flagging the cache key as a secret
+  // (for containing the SHA), which would prevent the cache key from being set
+  // as an output. Reference: https://github.com/orgs/community/discussions/26636
+  let combinedKey = AES.encrypt(
+    templatePathsHash,
+    process.env.GITHUB_SHA
+  ).toString();
+  if (combinedKey.length > CACHE_KEY_MAX_LENGTH) {
+    combinedKey = combinedKey.slice(0, CACHE_KEY_MAX_LENGTH);
+  }
+  return `dotenv-${combinedKey}`;
 }

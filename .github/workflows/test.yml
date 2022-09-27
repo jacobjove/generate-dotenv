@@ -20,6 +20,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - uses: ./
+    - id: generate-dotenv
+      uses: ./
       with:
         template-paths: 'tests/stubs/_.env'
+    - name: Cache dotenv
+      id: cache-dotenv
+      uses: actions/cache@v3
+      with:
+        path: .env
+        key: ${{ steps.generate-dotenv.outputs.cache-key }}
+    - name: Require cached dotenv file
+      if: steps.cache-dotenv.outputs.cache-hit != 'true'
+      run: echo "Failed to restore cached dotenv file." && exit 1
