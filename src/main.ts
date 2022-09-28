@@ -11,25 +11,27 @@ async function run(): Promise<void> {
     templatePaths,
     outputPath,
   } = await readInputs();
+  let restoredFromCache = false;
   if (useCache) {
     const restoredCacheKey = await restoreDotEnvFromCache({
       cacheKey,
       outputPath,
     });
-    if (typeof restoredCacheKey === "undefined") {
-      core.info("No cached dotenv file found.");
-    } else if (restoredCacheKey) {
+    restoredFromCache = restoredCacheKey === cacheKey;
+    if (restoredFromCache) {
       core.info(`Restored ${outputPath} from cache.`);
-      return;
+    } else if (restoredCacheKey) {
+      core.info("No cached dotenv file found.");
     }
   }
-  const template = await generateTemplate({ templatePaths });
-  const generated = await generateDotEnvFile({ template, outputPath });
-  if (!generated) return;
-  if (useCache) {
-    core.info(`Saving ${outputPath} to cache...`);
-    await saveDotEnvToCache({ cacheKey, outputPath });
-    core.info(`Saved ${outputPath} to cache with key: ${cacheKey}`);
+  if (!restoredFromCache) {
+    const template = await generateTemplate({ templatePaths });
+    const generated = await generateDotEnvFile({ template, outputPath });
+    if (generated && useCache) {
+      core.info(`Saving ${outputPath} to cache...`);
+      await saveDotEnvToCache({ cacheKey, outputPath });
+      core.info(`Saved ${outputPath} to cache with key: ${cacheKey}`);
+    }
   }
   core.setOutput("cache-key", useCache ? cacheKey : null);
 }

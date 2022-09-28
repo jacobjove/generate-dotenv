@@ -68039,27 +68039,28 @@ const template_1 = __nccwpck_require__(3932);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         const { cache: useCache, cacheKey, templatePaths, outputPath, } = yield (0, inputs_1.readInputs)();
+        let restoredFromCache = false;
         if (useCache) {
             const restoredCacheKey = yield (0, cache_1.restoreDotEnvFromCache)({
                 cacheKey,
                 outputPath,
             });
-            if (typeof restoredCacheKey === "undefined") {
-                core.info("No cached dotenv file found.");
+            restoredFromCache = restoredCacheKey === cacheKey;
+            if (restoredFromCache) {
+                core.info(`Restored ${outputPath} from cache.`);
             }
             else if (restoredCacheKey) {
-                core.info(`Restored ${outputPath} from cache.`);
-                return;
+                core.info("No cached dotenv file found.");
             }
         }
-        const template = yield (0, template_1.generateTemplate)({ templatePaths });
-        const generated = yield (0, generator_1.generateDotEnvFile)({ template, outputPath });
-        if (!generated)
-            return;
-        if (useCache) {
-            core.info(`Saving ${outputPath} to cache...`);
-            yield (0, cache_1.saveDotEnvToCache)({ cacheKey, outputPath });
-            core.info(`Saved ${outputPath} to cache with key: ${cacheKey}`);
+        if (!restoredFromCache) {
+            const template = yield (0, template_1.generateTemplate)({ templatePaths });
+            const generated = yield (0, generator_1.generateDotEnvFile)({ template, outputPath });
+            if (generated && useCache) {
+                core.info(`Saving ${outputPath} to cache...`);
+                yield (0, cache_1.saveDotEnvToCache)({ cacheKey, outputPath });
+                core.info(`Saved ${outputPath} to cache with key: ${cacheKey}`);
+            }
         }
         core.setOutput("cache-key", useCache ? cacheKey : null);
     });
