@@ -10,6 +10,7 @@ async function run(): Promise<void> {
     cacheKey,
     templatePaths,
     outputPath,
+    allowMissingVars,
   } = await readInputs();
   let restoredFromCache = false;
   if (useCache) {
@@ -26,7 +27,11 @@ async function run(): Promise<void> {
   }
   if (!restoredFromCache) {
     const template = await generateTemplate({ templatePaths });
-    const generated = await generateDotEnvFile({ template, outputPath });
+    const generated = await generateDotEnvFile({
+      template,
+      outputPath,
+      allowMissingVars,
+    });
     if (generated && useCache) {
       core.info(`Saving ${outputPath} to cache...`);
       await saveDotEnvToCache({ cacheKey, outputPath });

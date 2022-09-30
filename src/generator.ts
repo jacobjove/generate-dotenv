@@ -41,11 +41,16 @@ const POSTPROCESSING_REPLACEMENT_PATTERNS: [RegExp, string, string][] = [
   ],
 ];
 
+interface Options extends Pick<Inputs, "outputPath" | "allowMissingVars"> {
+  template: string;
+}
+
 export async function generateDotEnvFile({
   template,
   outputPath,
-}: { template: string } & Pick<Inputs, "outputPath">): Promise<boolean> {
-  const { ok } = await prepareEnv({ template });
+  allowMissingVars = false,
+}: Options): Promise<boolean> {
+  const { ok } = await prepareEnv({ template, allowMissingVars });
   if (!ok) {
     core.setFailed("Unable to prepare environment for dotenv file generation.");
     return false;
@@ -87,5 +92,4 @@ export async function generateDotEnvFile({
   }
   fs.writeFileSync(outputPath, processedFileContents);
   return true;
-  // grep -P -q '^[A-Z_]+?=$' .env && echo "Found empty var name: $(grep -P '^[A-Z_]+?=$' .env)" && exit 1
 }

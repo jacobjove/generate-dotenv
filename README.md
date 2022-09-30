@@ -36,6 +36,11 @@ The path of the output dotenv file. Default: `'.env'`
 If `cache-key` is not specified, a cache key is computed by concatenating the template paths
 and the `GITHUB_SHA` environment variable.
 
+### `allow-missing-vars`
+
+(Optional) Boolean specifying whether to generate the dotenv file even if one or more variables
+referenced in the template file is missing from the environment. Default: `'false'`
+
 ## Outputs
 
 ### `cache-key`
