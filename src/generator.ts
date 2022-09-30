@@ -92,5 +92,4 @@ export async function generateDotEnvFile({
   }
   fs.writeFileSync(outputPath, processedFileContents);
   return true;
-  // grep -P -q '^[A-Z_]+?=$' .env && echo "Found empty var name: $(grep -P '^[A-Z_]+?=$' .env)" && exit 1
 }
