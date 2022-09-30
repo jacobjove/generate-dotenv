@@ -41,11 +41,16 @@ const POSTPROCESSING_REPLACEMENT_PATTERNS: [RegExp, string, string][] = [
   ],
 ];
 
+interface Options extends Pick<Inputs, "outputPath" | "allowMissingVars"> {
+  template: string;
+}
+
 export async function generateDotEnvFile({
   template,
   outputPath,
-}: { template: string } & Pick<Inputs, "outputPath">): Promise<boolean> {
-  const { ok } = await prepareEnv({ template });
+  allowMissingVars = false,
+}: Options): Promise<boolean> {
+  const { ok } = await prepareEnv({ template, allowMissingVars });
   if (!ok) {
     core.setFailed("Unable to prepare environment for dotenv file generation.");
     return false;

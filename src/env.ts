@@ -8,8 +8,10 @@ interface Result {
 
 export async function prepareEnv({
   template,
+  allowMissingVars = false,
 }: {
   template: Awaited<ReturnType<typeof generateTemplate>>;
+  allowMissingVars: boolean;
 }): Promise<Result> {
   core.info("Preparing environment ...");
   const envObject = dotenv.parse(template);
@@ -23,7 +25,7 @@ export async function prepareEnv({
       }
     }
   }
-  if (missingKeys.length) {
+  if (missingKeys.length && !allowMissingVars) {
     core.setFailed(`Missing environment variables: ${missingKeys.join(", ")}`);
     return { ok: false };
   }

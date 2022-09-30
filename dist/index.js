@@ -67685,7 +67685,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.prepareEnv = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const dotenv = __importStar(__nccwpck_require__(2437));
-function prepareEnv({ template, }) {
+function prepareEnv({ template, allowMissingVars = false, }) {
     return __awaiter(this, void 0, void 0, function* () {
         core.info("Preparing environment ...");
         const envObject = dotenv.parse(template);
@@ -67699,7 +67699,7 @@ function prepareEnv({ template, }) {
                 }
             }
         }
-        if (missingKeys.length) {
+        if (missingKeys.length && !allowMissingVars) {
             core.setFailed(`Missing environment variables: ${missingKeys.join(", ")}`);
             return { ok: false };
         }
@@ -67790,9 +67790,9 @@ const POSTPROCESSING_REPLACEMENT_PATTERNS = [
         "Wrap JSON-like values in single quotes",
     ],
 ];
-function generateDotEnvFile({ template, outputPath, }) {
+function generateDotEnvFile({ template, outputPath, allowMissingVars = false, }) {
     return __awaiter(this, void 0, void 0, function* () {
-        const { ok } = yield (0, env_1.prepareEnv)({ template });
+        const { ok } = yield (0, env_1.prepareEnv)({ template, allowMissingVars });
         if (!ok) {
             core.setFailed("Unable to prepare environment for dotenv file generation.");
             return false;
@@ -67963,11 +67963,14 @@ function readInputs() {
         core.info(`Template paths: ${templatePaths}`);
         const outputPath = core.getInput("output-path");
         const cache = core.getBooleanInput("cache", { required: false }); // default: true (specified in action.yml)
+        const allowMissingVars = core.getBooleanInput("allow-missing-vars", {
+            required: false,
+        }); // default: false (specified in action.yml)
         const cacheKey = cache
             ? core.getInput("cache-key", { required: false }) ||
                 (yield createCacheKey(templatePaths))
             : "";
-        return { templatePaths, outputPath, cache, cacheKey };
+        return { templatePaths, outputPath, cache, cacheKey, allowMissingVars };
     });
 }
 exports.readInputs = readInputs;
@@ -68038,7 +68041,7 @@ const inputs_1 = __nccwpck_require__(7063);
 const template_1 = __nccwpck_require__(3932);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
-        const { cache: useCache, cacheKey, templatePaths, outputPath, } = yield (0, inputs_1.readInputs)();
+        const { cache: useCache, cacheKey, templatePaths, outputPath, allowMissingVars, } = yield (0, inputs_1.readInputs)();
         let restoredFromCache = false;
         if (useCache) {
             const restoredCacheKey = yield (0, cache_1.restoreDotEnvFromCache)({
@@ -68055,7 +68058,11 @@ function run() {
         }
         if (!restoredFromCache) {
             const template = yield (0, template_1.generateTemplate)({ templatePaths });
-            const generated = yield (0, generator_1.generateDotEnvFile)({ template, outputPath });
+            const generated = yield (0, generator_1.generateDotEnvFile)({
+                template,
+                outputPath,
+                allowMissingVars,
+            });
             if (generated && useCache) {
                 core.info(`Saving ${outputPath} to cache...`);
                 yield (0, cache_1.saveDotEnvToCache)({ cacheKey, outputPath });

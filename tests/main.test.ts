@@ -26,6 +26,7 @@ test("test if output value from action is same file as expected", async () => {
   await generateDotEnvFile({
     template,
     outputPath: OUTPUT_PATH,
+    allowMissingVars: false,
   });
   const dotEnvContent = fs.readFileSync(OUTPUT_PATH, "utf-8");
   expect(dotEnvContent.trim()).toEqual(expectedDotEnvContent.trim());
