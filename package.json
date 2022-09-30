@@ -31,7 +31,7 @@
     "@actions/cache": "^3.0.4",
     "@actions/core": "^1.9.1",
     "crypto-js": "^4.1.1",
-    "dotenv": "^16.0.2"
+    "dotenv": "^16.0.3"
   },
   "devDependencies": {
     "@types/crypto-js": "^4.1.1",
