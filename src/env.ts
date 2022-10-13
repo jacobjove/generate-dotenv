@@ -19,7 +19,7 @@ export async function prepareEnv({
   for (const [, value] of Object.entries(envObject)) {
     if (typeof value === "string" && value.startsWith("$")) {
       const envKey = value.replace(/\${?(.+?)\}?$/, "$1");
-      if (!process.env[envKey]) {
+      if (!process.env[envKey] && !missingKeys.includes(envKey)) {
         core.warning(`Environment variable ${envKey} is not set`);
         missingKeys.push(envKey);
       }
