@@ -23,7 +23,7 @@ environment for which the dotenv file is being produced.
 
 ### `output-path`
 
-The path of the output dotenv file. Default: `'.env'`
+(Optional) The path of the output dotenv file. Default: `'.env'`
 
 ### `cache`
 
