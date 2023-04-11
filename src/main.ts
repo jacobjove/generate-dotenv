@@ -34,8 +34,10 @@ async function run(): Promise<void> {
     });
     if (generated && useCache) {
       core.info(`Saving ${outputPath} to cache...`);
-      await saveDotEnvToCache({ cacheKey, outputPath });
-      core.info(`Saved ${outputPath} to cache with key: ${cacheKey}`);
+      const cacheId = await saveDotEnvToCache({ cacheKey, outputPath });
+      core.info(
+        `Saved ${outputPath} to cache with key: ${cacheKey} (cache ID: ${cacheId}))`
+      );
       // const restoredCacheKey = await restoreDotEnvFromCache({
       //   cacheKey,
       //   outputPath,
