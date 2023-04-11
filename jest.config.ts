@@ -6,10 +6,20 @@ export default async (): Promise<Config.InitialOptions> => {
     testEnvironment: "node",
     verbose: true,
     clearMocks: true,
-    moduleFileExtensions: ["js", "ts"],
+    moduleFileExtensions: ["ts", "js"],
     testMatch: ["**/*.test.ts"],
     transform: {
-      "^.+\\.ts$": "ts-jest",
+      "^.+\\.ts$": ["ts-jest", { tsconfig: "tsconfig.tests.json" }],
     },
+    cache: false,
+    projects: [
+      {
+        displayName: "generate-dotenv",
+        testMatch: ["<rootDir>/**/*.test.ts"],
+        transform: {
+          "^.+\\.ts$": ["ts-jest", { tsconfig: "tsconfig.tests.json" }],
+        },
+      },
+    ],
   };
 };
