@@ -26,8 +26,6 @@ export async function saveDotEnvToCache({
   cacheKey,
   outputPath,
 }: Pick<Inputs, "cacheKey" | "outputPath">): ReturnType<typeof saveCache> {
-  core.info(
-    `Attempting to save dotenv file to cache using the following key: ${cacheKey}`
-  );
+  core.info(`Saving dotenv file to cache using the following key: ${cacheKey}`);
   return saveCache([outputPath], cacheKey);
 }

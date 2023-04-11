@@ -67653,7 +67653,7 @@ function restoreDotEnvFromCache({ cacheKey, outputPath, }) {
 exports.restoreDotEnvFromCache = restoreDotEnvFromCache;
 function saveDotEnvToCache({ cacheKey, outputPath, }) {
     return __awaiter(this, void 0, void 0, function* () {
-        core.info(`Attempting to save dotenv file to cache using the following key: ${cacheKey}`);
+        core.info(`Saving dotenv file to cache using the following key: ${cacheKey}`);
         return (0, cache_1.saveCache)([outputPath], cacheKey);
     });
 }
@@ -68082,16 +68082,16 @@ function run() {
             });
             if (generated && useCache) {
                 core.info(`Saving ${outputPath} to cache...`);
-                yield (0, cache_1.saveDotEnvToCache)({ cacheKey, outputPath });
-                core.info(`Saved ${outputPath} to cache with key: ${cacheKey}`);
-                const restoredCacheKey = yield (0, cache_1.restoreDotEnvFromCache)({
-                    cacheKey,
-                    outputPath,
-                });
-                restoredFromCache = restoredCacheKey === cacheKey;
-                if (!restoredFromCache) {
-                    core.error(`Failed to cache ${outputPath} with key: ${cacheKey}`);
-                }
+                const cacheId = yield (0, cache_1.saveDotEnvToCache)({ cacheKey, outputPath });
+                core.info(`Saved ${outputPath} to cache with key: ${cacheKey} (cache ID: ${cacheId}))`);
+                // const restoredCacheKey = await restoreDotEnvFromCache({
+                //   cacheKey,
+                //   outputPath,
+                // });
+                // restoredFromCache = restoredCacheKey === cacheKey;
+                // if (!restoredFromCache) {
+                //   core.error(`Failed to cache ${outputPath} with key: ${cacheKey}`);
+                // }
             }
         }
         core.setOutput("cache-key", useCache ? cacheKey : null);
