@@ -73376,13 +73376,18 @@ exports.prepareEnv = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const dotenv = __importStar(__nccwpck_require__(2437));
 function prepareEnv({ template, allowMissingVars = false, }) {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         core.info("Preparing environment ...");
         const envObject = dotenv.parse(template);
         const missingKeys = [];
         for (const [, value] of Object.entries(envObject)) {
-            if (typeof value === "string" && value.startsWith("$")) {
-                const envKey = value.replace(/\${?([^\}\n\s]+?)[\}\n\s$]/, "$1");
+            if (typeof value === "string" && value.includes("${")) {
+                const envKey = (_a = value.match(/\${?([^\}\n\s]+?)[\}\n\s$]/)) === null || _a === void 0 ? void 0 : _a[1];
+                if (!envKey) {
+                    core.warning(`Failed to parse environment variable: ${value}`);
+                    continue;
+                }
                 if (!process.env[envKey] && !missingKeys.includes(envKey)) {
                     core.warning(`Environment variable ${envKey} is not set`);
                     missingKeys.push(envKey);
