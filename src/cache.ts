@@ -3,9 +3,9 @@ import * as core from "@actions/core";
 import { Inputs } from "./inputs";
 
 export async function restoreDotEnvFromCache({
-  cacheKey,
+  key,
   outputPath,
-}: Pick<Inputs, "cacheKey" | "outputPath">): ReturnType<typeof restoreCache> {
+}: Pick<Inputs, "key" | "outputPath">): ReturnType<typeof restoreCache> {
   const pathsToRestore = [outputPath];
 
   // TODO: Add note in README that we use this environment variable.
@@ -16,16 +16,16 @@ export async function restoreDotEnvFromCache({
     process.env.SEGMENT_DOWNLOAD_TIMEOUT_MINS ?? "15";
 
   core.info(
-    `Attempting to restore dotenv file from cache using the following key: ${cacheKey}`
+    `Attempting to restore dotenv file from cache using the following key: ${key}`
   );
 
-  return restoreCache(pathsToRestore, cacheKey);
+  return restoreCache(pathsToRestore, key);
 }
 
 export async function saveDotEnvToCache({
-  cacheKey,
+  key,
   outputPath,
-}: Pick<Inputs, "cacheKey" | "outputPath">): ReturnType<typeof saveCache> {
-  core.info(`Saving dotenv file to cache using the following key: ${cacheKey}`);
-  return saveCache([outputPath], cacheKey);
+}: Pick<Inputs, "key" | "outputPath">): ReturnType<typeof saveCache> {
+  core.info(`Saving dotenv file to cache using the following key: ${key}`);
+  return saveCache([outputPath], key);
 }

@@ -29,11 +29,11 @@ environment for which the dotenv file is being produced.
 
 (Optional) Boolean specifying whether to cache the dotenv file. Default: `'true'`
 
-### `cache-key`
+### `key`
 
 (Optional) The key used to cache the dotenv file (if caching is not disabled).
 
-If `cache-key` is not specified, a cache key is computed by concatenating the template paths
+If `key` is not specified, a cache key is computed by concatenating the template paths
 and the `GITHUB_SHA` environment variable.
 
 ### `allow-missing-vars`
@@ -43,7 +43,7 @@ referenced in the template file is missing from the environment. Default: `'fals
 
 ## Outputs
 
-### `cache-key`
+### `key`
 
 The key used to cache the dotenv file (if caching is not disabled), or null (if caching is disabled).
 
