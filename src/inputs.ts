@@ -9,7 +9,8 @@ export interface Inputs {
   templatePaths: string[];
   outputPath: string;
   cache: boolean;
-  cacheKey: string;
+  upload: boolean;
+  key: string;
   allowMissingVars: boolean;
 }
 
@@ -22,14 +23,15 @@ export async function readInputs(): Promise<Inputs> {
   core.info(`Template paths: ${templatePaths}`);
   const outputPath = core.getInput("output-path");
   const cache = core.getBooleanInput("cache", { required: false }); // default: true (specified in action.yml)
+  const upload = core.getBooleanInput("upload", { required: false }); // default: false (specified in action.yml)
   const allowMissingVars = core.getBooleanInput("allow-missing-vars", {
     required: false,
   }); // default: false (specified in action.yml)
-  const cacheKey = cache
-    ? core.getInput("cache-key", { required: false }) ||
+  const key = cache
+    ? core.getInput("key", { required: false }) ||
       (await createCacheKey(templatePaths))
     : "";
-  return { templatePaths, outputPath, cache, cacheKey, allowMissingVars };
+  return { templatePaths, outputPath, cache, upload, key, allowMissingVars };
 }
 
 async function createCacheKey(templatePaths: string[]): Promise<string> {

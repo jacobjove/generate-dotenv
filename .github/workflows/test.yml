@@ -29,8 +29,8 @@ jobs:
       uses: actions/cache@v3
       with:
         path: .env
-        key: ${{ steps.generate-dotenv.outputs.cache-key }}
+        key: ${{ steps.generate-dotenv.outputs.key }}
         fail-on-cache-miss: true
     # - name: Require cached dotenv file
     #   if: steps.cache-dotenv.outputs.cache-hit != 'true'
-    #   run: echo "Failed to restore cached dotenv file using key ${{ steps.generate-dotenv.outputs.cache-key }}" && exit 1
+    #   run: echo "Failed to restore cached dotenv file using key ${{ steps.generate-dotenv.outputs.key }}" && exit 1

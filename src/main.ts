@@ -1,3 +1,4 @@
+import * as artifact from "@actions/artifact";
 import * as core from "@actions/core";
 import { restoreDotEnvFromCache, saveDotEnvToCache } from "./cache";
 import { generateDotEnvFile } from "./generator";
@@ -5,50 +6,61 @@ import { readInputs } from "./inputs";
 import { generateTemplate } from "./template";
 
 async function run(): Promise<void> {
-  const {
-    cache: useCache,
-    cacheKey,
-    templatePaths,
-    outputPath,
-    allowMissingVars,
-  } = await readInputs();
-  let restoredFromCache = false;
-  if (useCache) {
+  const { cache, upload, key, templatePaths, outputPath, allowMissingVars } =
+    await readInputs();
+  let restored = false;
+  if (cache) {
     const restoredCacheKey = await restoreDotEnvFromCache({
-      cacheKey,
+      key,
       outputPath,
     });
-    restoredFromCache = restoredCacheKey === cacheKey;
-    if (restoredFromCache) {
+    restored = restoredCacheKey === key;
+    if (restored) {
       core.info(`Restored ${outputPath} from cache.`);
     } else if (restoredCacheKey) {
       core.info("No cached dotenv file found.");
     }
   }
-  if (!restoredFromCache) {
+  if (!restored) {
     const template = await generateTemplate({ templatePaths });
     const generated = await generateDotEnvFile({
       template,
       outputPath,
       allowMissingVars,
     });
-    if (generated && useCache) {
-      core.info(`Saving ${outputPath} to cache...`);
-      const cacheId = await saveDotEnvToCache({ cacheKey, outputPath });
-      core.info(
-        `Saved ${outputPath} to cache with key: ${cacheKey} (cache ID: ${cacheId}))`
-      );
-      // const restoredCacheKey = await restoreDotEnvFromCache({
-      //   cacheKey,
-      //   outputPath,
-      // });
-      // restoredFromCache = restoredCacheKey === cacheKey;
-      // if (!restoredFromCache) {
-      //   core.error(`Failed to cache ${outputPath} with key: ${cacheKey}`);
-      // }
+    if (generated) {
+      if (cache) {
+        core.info(`Saving ${outputPath} to cache...`);
+        const cacheId = await saveDotEnvToCache({ key, outputPath });
+        core.info(
+          `Saved ${outputPath} to cache with key: ${key} (cache ID: ${cacheId}))`
+        );
+        // const restoredCacheKey = await restoreDotEnvFromCache({
+        //   key,
+        //   outputPath,
+        // });
+        // restoredFromCache = restoredCacheKey === key;
+        // if (!restoredFromCache) {
+        //   core.error(`Failed to cache ${outputPath} with key: ${key}`);
+        // }
+      }
+      if (upload) {
+        core.info(`Uploading ${outputPath} as an artifact...`);
+        const artifactClient = artifact.create();
+        const { artifactName } = await artifactClient.uploadArtifact(
+          key,
+          [outputPath],
+          ".", // root directory
+          {
+            continueOnError: false,
+            retentionDays: 1,
+          }
+        );
+        core.info(`Uploaded ${outputPath} as artifact: ${artifactName}`);
+      }
     }
   }
-  core.setOutput("cache-key", useCache ? cacheKey : null);
+  core.setOutput("key", key);
 }
 
 run();
