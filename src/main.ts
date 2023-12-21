@@ -1,4 +1,4 @@
-import * as artifact from "@actions/artifact";
+import { DefaultArtifactClient } from "@actions/artifact";
 import * as core from "@actions/core";
 import { restoreDotEnvFromCache, saveDotEnvToCache } from "./cache";
 import { generateDotEnvFile } from "./generator";
@@ -33,7 +33,7 @@ async function run(): Promise<void> {
         core.info(`Saving ${outputPath} to cache...`);
         const cacheId = await saveDotEnvToCache({ key, outputPath });
         core.info(
-          `Saved ${outputPath} to cache with key: ${key} (cache ID: ${cacheId}))`
+          `Saved ${outputPath} to cache with key: ${key} (cache ID: ${cacheId}))`,
         );
         // const restoredCacheKey = await restoreDotEnvFromCache({
         //   key,
@@ -45,18 +45,15 @@ async function run(): Promise<void> {
         // }
       }
       if (upload) {
+        const artifactClient = new DefaultArtifactClient();
         core.info(`Uploading ${outputPath} as an artifact...`);
-        const artifactClient = artifact.create();
-        const { artifactName } = await artifactClient.uploadArtifact(
+        const { size, id } = await artifactClient.uploadArtifact(
           key,
           [outputPath],
           ".", // root directory
-          {
-            continueOnError: false,
-            retentionDays: 1,
-          }
+          { retentionDays: 1 },
         );
-        core.info(`Uploaded ${outputPath} as artifact: ${artifactName}`);
+        core.info(`Uploaded ${outputPath} as artifact ${id} (${size}).`);
       }
     }
   }
