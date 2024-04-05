@@ -35,7 +35,7 @@
   "devDependencies": {
     "@jest/types": "^29.6.3",
     "@types/crypto-js": "^4.1.1",
-    "@types/jest": "^29.5.11",
+    "@types/jest": "^29.5.12",
     "@types/node": "^18.15.11",
     "@typescript-eslint/parser": "^5.62.0",
     "@vercel/ncc": "^0.36.1",
